@@ -1,3 +1,8 @@
+CREATE TABLE unique_emails (
+    email VARCHAR(100) PRIMARY KEY,
+    user_id INT NOT NULL
+);
+
 CREATE TABLE users (
     user_id SERIAL,
     username VARCHAR(50) NOT NULL,
@@ -8,10 +13,7 @@ CREATE TABLE users (
     is_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id),
-    -- The partition key (user_id) MUST be included in all unique constraints
-    UNIQUE (user_id, username),
-    UNIQUE (user_id, email)
+    PRIMARY KEY (user_id)
 ) PARTITION BY HASH (user_id);
 
 CREATE TABLE users_part_0 PARTITION OF users FOR VALUES WITH (MODULUS 3, REMAINDER 0);
