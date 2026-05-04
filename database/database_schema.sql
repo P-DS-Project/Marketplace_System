@@ -1,43 +1,55 @@
+CREATE DATABASE marketplace_node1;
+\c marketplace_node1;
+
 CREATE TABLE users (
-    user_id INT IDENTITY(1,1) PRIMARY KEY,
+    user_id SERIAL,
     username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(256) NOT NULL,
     salt VARCHAR(64) NOT NULL,
     role VARCHAR(20) CHECK (role IN ('BUYER', 'SELLER', 'ADMIN', 'EXTERNAL_STORE')),
-    is_verified BIT DEFAULT 0,
-    created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE()
-);
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id)
+) PARTITION BY HASH (user_id);
+
+CREATE TABLE users_part_0 PARTITION OF users FOR VALUES WITH (MODULUS 3, REMAINDER 0);
+CREATE TABLE users_part_1 PARTITION OF users FOR VALUES WITH (MODULUS 3, REMAINDER 1);
+CREATE TABLE users_part_2 PARTITION OF users FOR VALUES WITH (MODULUS 3, REMAINDER 2);
 
 CREATE TABLE accounts (
-    account_id INT IDENTITY(1,1) PRIMARY KEY,
+    account_id SERIAL PRIMARY KEY,
     user_id INT NOT NULL,
     balance DECIMAL(15,2) DEFAULT 0.00,
     currency VARCHAR(3) DEFAULT 'EGP',
-    updated_at DATETIME DEFAULT GETDATE(),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 CREATE TABLE chat_messages (
-    message_id INT IDENTITY(1,1) PRIMARY KEY,
+    message_id SERIAL PRIMARY KEY,
     sender_id INT NOT NULL,
     receiver_id INT NOT NULL,
     content TEXT NOT NULL,
-    is_read BIT DEFAULT 0,
-    timestamp DATETIME DEFAULT GETDATE(),
+    is_read BOOLEAN DEFAULT FALSE,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_sender FOREIGN KEY (sender_id) REFERENCES users(user_id),
     CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES users(user_id)
 );
 
+
+CREATE DATABASE marketplace_node2;
+\c marketplace_node2;
+
 CREATE TABLE categories (
-    category_id INT IDENTITY(1,1) PRIMARY KEY,
+    category_id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     description TEXT
 );
 
 CREATE TABLE products (
-    product_id INT IDENTITY(1,1) PRIMARY KEY,
+    product_id SERIAL,
     seller_id INT NOT NULL,
     category_id INT NOT NULL,
     name VARCHAR(200) NOT NULL,
@@ -45,22 +57,31 @@ CREATE TABLE products (
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('AVAILABLE', 'SOLD', 'REMOVED')),
-    created_at DATETIME DEFAULT GETDATE(),
-    updated_at DATETIME DEFAULT GETDATE(),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (product_id),
     CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories(category_id)
-);
+) PARTITION BY HASH (product_id);
+
+CREATE TABLE products_part_0 PARTITION OF products FOR VALUES WITH (MODULUS 3, REMAINDER 0);
+CREATE TABLE products_part_1 PARTITION OF products FOR VALUES WITH (MODULUS 3, REMAINDER 1);
+CREATE TABLE products_part_2 PARTITION OF products FOR VALUES WITH (MODULUS 3, REMAINDER 2);
 
 CREATE TABLE inventory (
-    inventory_id INT IDENTITY(1,1) PRIMARY KEY,
+    inventory_id SERIAL PRIMARY KEY,
     product_id INT NOT NULL UNIQUE,
     quantity INT NOT NULL CHECK (quantity >= 0),
     warehouse_node VARCHAR(50),
-    updated_at DATETIME DEFAULT GETDATE(),
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_product FOREIGN KEY (product_id) REFERENCES products(product_id)
 );
 
+
+CREATE DATABASE marketplace_node3;
+\c marketplace_node3;
+
 CREATE TABLE transactions (
-    transaction_id INT IDENTITY(1,1) PRIMARY KEY,
+    transaction_id SERIAL,
     buyer_id INT NOT NULL,
     seller_id INT,
     product_id INT,
@@ -68,15 +89,20 @@ CREATE TABLE transactions (
     amount DECIMAL(15,2) NOT NULL,
     status VARCHAR(20) CHECK (status IN ('PENDING', 'COMPLETED', 'FAILED', 'REFUNDED')),
     type VARCHAR(20) CHECK (type IN ('PURCHASE', 'DEPOSIT', 'WITHDRAWAL')),
-    created_at DATETIME DEFAULT GETDATE(),
-    completed_at DATETIME
-);
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    completed_at TIMESTAMP,
+    PRIMARY KEY (transaction_id, created_at)
+) PARTITION BY RANGE (created_at);
+
+CREATE TABLE transactions_2026_q1 PARTITION OF transactions FOR VALUES FROM ('2026-01-01') TO ('2026-04-01');
+CREATE TABLE transactions_2026_q2 PARTITION OF transactions FOR VALUES FROM ('2026-04-01') TO ('2026-07-01');
+CREATE TABLE transactions_default PARTITION OF transactions DEFAULT;
 
 CREATE TABLE reports (
-    report_id INT IDENTITY(1,1) PRIMARY KEY,
+    report_id SERIAL PRIMARY KEY,
     generated_by INT NOT NULL,
     type VARCHAR(50) NOT NULL,
-    parameters NVARCHAR(MAX),
+    parameters JSON,
     content TEXT,
-    generated_at DATETIME DEFAULT GETDATE()
+    generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
