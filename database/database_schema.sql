@@ -1,10 +1,15 @@
 CREATE DATABASE marketplace_node1;
 \c marketplace_node1;
 
+CREATE TABLE unique_emails (
+    email VARCHAR(100) PRIMARY KEY,
+    user_id INT NOT NULL
+);
+
 CREATE TABLE users (
     user_id SERIAL,
-    username VARCHAR(50) UNIQUE NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
+    username VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
     password_hash VARCHAR(256) NOT NULL,
     salt VARCHAR(64) NOT NULL,
     role VARCHAR(20) CHECK (role IN ('BUYER', 'SELLER', 'ADMIN', 'EXTERNAL_STORE')),
