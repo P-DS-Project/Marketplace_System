@@ -10,12 +10,10 @@ import java.sql.SQLException;
 
 public class UserDAO {
 
-    // Helper method to get the Node 1 connection
     private Connection getConnection() throws SQLException {
         return DatabaseConnectionManager.getNode1UsersConnection();
     }
 
-    // 1. READ: Fetch a user by their username for logging in
     public UserEntity findByUsername(String username) {
         String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified FROM users WHERE username = ?";
 
@@ -26,7 +24,7 @@ public class UserDAO {
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    // In a real app, you would create a UserEntity object to hold this data
+
                     UserEntity user = new UserEntity();
                     user.setUserId(rs.getInt("user_id"));
                     user.setUsername(rs.getString("username"));
@@ -41,7 +39,7 @@ public class UserDAO {
             System.err.println("Database error fetching user: " + username);
             e.printStackTrace();
         }
-        return null; // User not found
+        return null;
     }
 
     // 2. WRITE: Insert a new user (incorporating the unique lookup tables we

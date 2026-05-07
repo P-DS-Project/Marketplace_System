@@ -9,7 +9,7 @@ import java.net.Socket;
 public class ClientHandler implements Runnable {
 
     private final Socket clientSocket;
-    private final RequestRouter router; // Inject the router
+    private final RequestRouter router;
 
     public ClientHandler(Socket socket, RequestRouter router) {
         this.clientSocket = socket;
@@ -21,13 +21,10 @@ public class ClientHandler implements Runnable {
         try (
                 BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true)) {
-            // Inside your ClientHandler.java run() method...
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
 
-                // Split into exactly 3 parts: [SERVICE] [ACTION] [JSON]
-                // Example: "USER" "REGISTER" "{"username":"abdel"}"
                 String[] parts = inputLine.split(" ", 3);
 
                 if (parts.length >= 2) {
@@ -35,7 +32,6 @@ public class ClientHandler implements Runnable {
                     String action = parts[1];
                     String jsonPayload = (parts.length == 3) ? parts[2] : "{}";
 
-                    // Let the Router instantly map it to the right Service Handler
                     String response = router.route(serviceDomain, action, jsonPayload);
                     out.println(response);
                 } else {
@@ -44,7 +40,13 @@ public class ClientHandler implements Runnable {
             }
         } catch (IOException e) {
             System.err.println("Client disconnected unexpectedly.");
+        } finally {
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                System.err.println("Error closing client socket: " + e.getMessage());
+            }
         }
-        // ... socket closing logic ..."UserService Regiser {name: lckedep, WUdh: ;ple} "
+
     }
 }
