@@ -20,7 +20,7 @@ public class TransactionDAO {
         List<TransactionEntity> transactions = new ArrayList<>();
         String sql = "SELECT transaction_id, buyer_id, seller_id, product_id, quantity, amount, status, type FROM transactions WHERE buyer_id = ? OR seller_id = ?";
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             pstmt.setInt(2, userId);
             try (ResultSet rs = pstmt.executeQuery()) {
@@ -34,6 +34,8 @@ public class TransactionDAO {
                     t.setAmount(rs.getDouble("amount"));
                     t.setStatus(rs.getString("status"));
                     t.setType(rs.getString("type"));
+                    t.setTimestamp(rs.getTimestamp("created_at"));
+                    t.setTimestamp(rs.getString("completed_at"));
                     transactions.add(t);
                 }
             }
