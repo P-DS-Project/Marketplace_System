@@ -1,5 +1,7 @@
 package Entities;
 
+import java.security.Timestamp;
+
 public class TransactionEntity {
     private int transactionId;
     private int buyerId;
@@ -9,8 +11,8 @@ public class TransactionEntity {
     private double amount;
     private String status;
     private String type;
-    private String created_at;
-    private String completed_at;
+    private Timestamp created_at;
+    private Timestamp completed_at;
 
     public int getTransactionId() {
         return transactionId;
@@ -76,19 +78,19 @@ public class TransactionEntity {
         this.type = type;
     }
 
-    public String getCreated_at() {
+    public Timestamp getCreated_at() {
         return created_at;
     }
 
-    public void setCreated_at(String created_at) {
+    public void setCreated_at(Timestamp created_at) {
         this.created_at = created_at;
     }
 
-    public String getCompleted_at() {
+    public Timestamp getCompleted_at() {
         return completed_at;
     }
 
-    public void setCompleted_at(String completed_at) {
+    public void setCompleted_at(Timestamp completed_at) {
         this.completed_at = completed_at;
     }
 
