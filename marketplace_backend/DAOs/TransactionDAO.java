@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.security.Timestamp;
 
 public class TransactionDAO {
 
@@ -34,8 +35,8 @@ public class TransactionDAO {
                     t.setAmount(rs.getDouble("amount"));
                     t.setStatus(rs.getString("status"));
                     t.setType(rs.getString("type"));
-                    t.setCreated_at(rs.getTimestamp("created_at"));
-                    t.setCompleted_at(rs.getTimestamp("completed_at"));
+                    t.setCreated_at(rs.getString("created_at"));
+                    t.setCompleted_at(rs.getString("completed_at"));
                     transactions.add(t);
                 }
             }

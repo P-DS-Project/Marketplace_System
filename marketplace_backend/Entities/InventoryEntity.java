@@ -1,8 +1,9 @@
+
 public class InventoryEntity {
     private int inventoryId;
     private int productId;
     private int quantity;
-    private Timestamp Updated_at;
+    private String Updated_at;
     private String Wearhouse_node;
 
     public int getInventoryId() {
@@ -29,11 +30,11 @@ public class InventoryEntity {
         this.quantity = quantity;
     }
 
-    public Timestamp getUpdated_at() {
+    public String getUpdated_at() {
         return Updated_at;
     }
 
-    public void setUpdated_at(Timestamp updated_at) {
+    public void setUpdated_at(String updated_at) {
         Updated_at = updated_at;
     }
 
