@@ -15,7 +15,7 @@ public class MarketplaceClient {
             System.out.println("Connected to Marketplace Server.");
 
             // 1. Send a Registration Command
-            String registerCommand = "REGISTER {\"username\":\"abdel\", \"email\":\"test@test.com\", \"password\":\"secure123\"}";
+            String registerCommand = "UserSrvice REGISTER {\"username\":\"abdel\", \"email\":\"test@test.com\", \"password\":\"secure123\"}";
             System.out.println("Sending: " + registerCommand);
             out.println(registerCommand);
 

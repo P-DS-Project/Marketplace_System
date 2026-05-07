@@ -1,3 +1,8 @@
+package Microservices;
+
+import DAOs.UserDAO;
+import Entities.UserEntity;
+
 public class UserService {
 
     private final UserDAO userDao;

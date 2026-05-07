@@ -1,3 +1,7 @@
+package Handlers;
+
+import Microservices.UserService;
+
 public class UserHandler implements ServiceHandler {
 
     private final UserService userService;
@@ -16,6 +20,8 @@ public class UserHandler implements ServiceHandler {
                 return "200 {\"token\":\"jwt_token\"}";
             default:
                 return "400 {\"error\":\"Unknown User Action: " + action + "\"}";
+                // localhost:8080 UserService LOGIN {"username":"abdel", "password":"secure123"}
+                // localhost:appi/usre/
         }
     }
 }

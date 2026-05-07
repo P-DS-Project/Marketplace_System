@@ -1,3 +1,5 @@
+package Utils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -43,6 +45,6 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             System.err.println("Client disconnected unexpectedly.");
         }
-        // ... socket closing logic ...
+        // ... socket closing logic ..."UserService Regiser {name: lckedep, WUdh: ;ple} "
     }
 }

@@ -1,3 +1,5 @@
+package Entities;
+
 public class UserEntity {
 
     // These variables match the columns in your Node 1 'users' table
