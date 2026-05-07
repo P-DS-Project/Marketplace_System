@@ -34,8 +34,8 @@ public class TransactionDAO {
                     t.setAmount(rs.getDouble("amount"));
                     t.setStatus(rs.getString("status"));
                     t.setType(rs.getString("type"));
-                    t.setTimestamp(rs.getTimestamp("created_at"));
-                    t.setTimestamp(rs.getTimestamp("completed_at"));
+                    t.setCreated_at(rs.getTimestamp("created_at"));
+                    t.setCompleted_at(rs.getTimestamp("completed_at"));
                     transactions.add(t);
                 }
             }
