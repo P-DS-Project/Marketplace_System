@@ -1,3 +1,4 @@
+package entities;
 
 public class InventoryEntity {
     private int inventoryId;
