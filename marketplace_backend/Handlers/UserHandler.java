@@ -1,6 +1,6 @@
-package Handlers;
+package handlers;
 
-import Microservices.UserService;
+import microservices.UserService;
 import org.json.JSONObject;
 
 public class UserHandler implements ServiceHandler {

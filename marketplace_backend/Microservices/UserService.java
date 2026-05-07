@@ -1,13 +1,13 @@
-package Microservices;
+package microservices;
 
-import DAOs.UserDAO;
-import DAOs.AccountDAO;
-import DAOs.ProductDAO;
-import DAOs.TransactionDAO;
-import Entities.UserEntity;
-import Entities.AccountEntity;
-import Entities.ProductEntity;
-import Entities.TransactionEntity;
+import daos.UserDAO;
+import daos.AccountDAO;
+import daos.ProductDAO;
+import daos.TransactionDAO;
+import entities.UserEntity;
+import entities.AccountEntity;
+import entities.ProductEntity;
+import entities.TransactionEntity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

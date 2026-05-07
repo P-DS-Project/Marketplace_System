@@ -1,4 +1,4 @@
-package Microservices;
+package microservices;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

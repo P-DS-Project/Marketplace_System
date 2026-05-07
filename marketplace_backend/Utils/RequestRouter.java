@@ -1,8 +1,8 @@
-package Utils;
+package utils;
 
-import Handlers.ServiceHandler;
-import Handlers.UserHandler;
-import Handlers.ProductHandler;
+import handlers.ServiceHandler;
+import handlers.UserHandler;
+import handlers.ProductHandler;
 
 import java.util.HashMap;
 import java.util.Map;

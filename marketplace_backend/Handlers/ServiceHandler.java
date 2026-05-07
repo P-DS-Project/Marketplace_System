@@ -1,4 +1,4 @@
-package Handlers;
+package handlers;
 
 public interface ServiceHandler {
     // Every service must know how to handle its own actions

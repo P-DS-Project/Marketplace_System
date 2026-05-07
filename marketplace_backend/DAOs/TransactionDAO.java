@@ -1,7 +1,7 @@
-package DAOs;
+package daos;
 
-import Entities.TransactionEntity;
-import Utils.DatabaseConnectionManager;
+import entities.TransactionEntity;
+import utils.DatabaseConnectionManager;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
