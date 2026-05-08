@@ -44,4 +44,21 @@ public class TransactionDAO {
         }
         return transactions;
     }
+
+    public boolean insertTransaction(int buyerId, int sellerId, int productId, int quantity, double amount, String status, String type) {
+        String sql = "INSERT INTO transactions (buyer_id, seller_id, product_id, quantity, amount, status, type) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, buyerId);
+            pstmt.setInt(2, sellerId);
+            pstmt.setInt(3, productId);
+            pstmt.setInt(4, quantity);
+            pstmt.setDouble(5, amount);
+            pstmt.setString(6, status);
+            pstmt.setString(7, type);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+            return false; 
+        }
+    }
 }

@@ -47,4 +47,16 @@ public class AccountDAO {
         }
         return null;
     }
+
+    public boolean updateBalance(int userId, double newBalance) {
+        String sql = "UPDATE accounts SET balance = ? WHERE user_id = ?";
+        try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setDouble(1, newBalance);
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+            return false; 
+        }
+    }
 }
