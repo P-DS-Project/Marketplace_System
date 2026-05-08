@@ -5,7 +5,7 @@ public class InventoryEntity {
     private int productId;
     private int quantity;
     private String Updated_at;
-    private String Wearhouse_node;
+    private String Warehouse_node;
 
     public int getInventoryId() {
         return inventoryId;
@@ -39,12 +39,12 @@ public class InventoryEntity {
         Updated_at = updated_at;
     }
 
-    public String getWearhouse_node() {
-        return Wearhouse_node;
+    public String getWarehouse_node() {
+        return Warehouse_node;
     }
 
-    public void setWearhouse_node(String wearhouse_node) {
-        Wearhouse_node = wearhouse_node;
+    public void setWarehouse_node(String warehouse_node) {
+        Warehouse_node = warehouse_node;
     }
 
 }
