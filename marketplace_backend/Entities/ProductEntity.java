@@ -7,6 +7,7 @@ public class ProductEntity {
     private String name;
     private double price;
     private String status;
+    private String description;
 
     public int getProductId() {
         return productId;
@@ -55,5 +56,12 @@ public class ProductEntity {
     public void setStatus(String status) {
         this.status = status;
     }
+    
+    public String getDescription() {
+        return description;
+    }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }
