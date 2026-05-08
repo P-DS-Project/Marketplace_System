@@ -5,6 +5,9 @@ import Entities.InventoryEntity;
 public class InventoryService {
     private InventoryDAO inventoryDao;
 
+    //public InventoryService(){
+    //this.inventoryDao = new InventoryDAO();
+    //}
     public InventoryService(InventoryDAO inventoryDao) {
         this.inventoryDao = inventoryDao;
     }
