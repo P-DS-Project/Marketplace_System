@@ -1,4 +1,4 @@
-package microservices;
+package Microservices;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -38,10 +38,11 @@ public class AuthService {
         // In a real app, use a JWT library like jjwt to sign the token properly.
         // For pure Java, we simulate it by Base64 encoding the payload.
         String header = Base64.getEncoder().encodeToString("{\"alg\":\"none\",\"typ\":\"JWT\"}".getBytes());
-        String payload = Base64.getEncoder().encodeToString(("{\"userId\":" + userId + ",\"role\":\"" + role + "\"}").getBytes());
+        String payload = Base64.getEncoder()
+                .encodeToString(("{\"userId\":" + userId + ",\"role\":\"" + role + "\"}").getBytes());
         return header + "." + payload + ".signature_stub";
     }
-    
+
     /**
      * Very basic stub to verify if a token is valid
      */
@@ -53,10 +54,12 @@ public class AuthService {
      * Extracts the userId from our simple Base64 encoded token.
      */
     public int extractUserIdFromToken(String token) {
-        if (!verifyJWT(token)) return -1;
+        if (!verifyJWT(token))
+            return -1;
         try {
             String[] parts = token.split("\\.");
-            if (parts.length < 2) return -1;
+            if (parts.length < 2)
+                return -1;
             String payloadStr = new String(Base64.getDecoder().decode(parts[1]));
             // Use org.json.JSONObject to parse the payload safely
             org.json.JSONObject payload = new org.json.JSONObject(payloadStr);

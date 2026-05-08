@@ -1,12 +1,12 @@
-package daos;
-
-import entities.UserEntity;
-import utils.DatabaseConnectionManager;
+package DAOs;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import Entities.UserEntity;
+import Utils.DatabaseConnectionManager;
 
 public class UserDAO {
 
@@ -69,7 +69,8 @@ public class UserDAO {
         return user;
     }
 
-    // 2. WRITE: Insert a new user (incorporating the unique lookup tables we discussed)
+    // 2. WRITE: Insert a new user (incorporating the unique lookup tables we
+    // discussed)
     public int createUser(String username, String email, String passwordHash, String salt, String role) {
         String insertUser = "INSERT INTO users (username, email, password_hash, salt, role) VALUES (?, ?, ?, ?, ?)";
         String insertEmail = "INSERT INTO unique_emails (email, user_id) VALUES (?, ?)";
@@ -79,21 +80,24 @@ public class UserDAO {
 
             try {
                 int generatedUserId = -1;
-                
+
                 // Step A: Insert the actual user data and get the generated user_id
-                // Note: The unique constraint on 'users' table will naturally handle username uniqueness
-                try (PreparedStatement psMain = conn.prepareStatement(insertUser, PreparedStatement.RETURN_GENERATED_KEYS)) {
+                // Note: The unique constraint on 'users' table will naturally handle username
+                // uniqueness
+                try (PreparedStatement psMain = conn.prepareStatement(insertUser,
+                        PreparedStatement.RETURN_GENERATED_KEYS)) {
                     psMain.setString(1, username);
                     psMain.setString(2, email);
                     psMain.setString(3, passwordHash);
                     psMain.setString(4, salt);
                     psMain.setString(5, role);
                     psMain.executeUpdate();
-                    
+
                     try (ResultSet rs = psMain.getGeneratedKeys()) {
                         if (rs.next()) {
-                            // PostgreSQL getGeneratedKeys usually returns all columns or the id depending on the driver
-                            generatedUserId = rs.getInt(1); 
+                            // PostgreSQL getGeneratedKeys usually returns all columns or the id depending
+                            // on the driver
+                            generatedUserId = rs.getInt(1);
                         } else {
                             throw new SQLException("Creating user failed, no ID obtained.");
                         }

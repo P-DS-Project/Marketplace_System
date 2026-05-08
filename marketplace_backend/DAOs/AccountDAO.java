@@ -1,12 +1,12 @@
-package daos;
-
-import entities.AccountEntity;
-import utils.DatabaseConnectionManager;
+package DAOs;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+
+import Entities.AccountEntity;
+import Utils.DatabaseConnectionManager;
 
 public class AccountDAO {
 
@@ -17,7 +17,7 @@ public class AccountDAO {
     public boolean createAccount(int userId) {
         String sql = "INSERT INTO accounts (user_id, balance, currency) VALUES (?, 0.00, 'EGP')";
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             pstmt.executeUpdate();
             return true;
@@ -30,7 +30,7 @@ public class AccountDAO {
     public AccountEntity getAccountByUserId(int userId) {
         String sql = "SELECT account_id, user_id, balance, currency FROM accounts WHERE user_id = ?";
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {

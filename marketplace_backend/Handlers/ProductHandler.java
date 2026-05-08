@@ -1,4 +1,4 @@
-package handlers;
+package Handlers;
 
 public class ProductHandler implements ServiceHandler {
 

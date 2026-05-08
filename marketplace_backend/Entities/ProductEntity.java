@@ -1,4 +1,4 @@
-package entities;
+package Entities;
 
 public class ProductEntity {
     private int productId;
@@ -8,21 +8,52 @@ public class ProductEntity {
     private double price;
     private String status;
 
-    public int getProductId() { return productId; }
-    public void setProductId(int productId) { this.productId = productId; }
+    public int getProductId() {
+        return productId;
+    }
 
-    public int getSellerId() { return sellerId; }
-    public void setSellerId(int sellerId) { this.sellerId = sellerId; }
+    public void setProductId(int productId) {
+        this.productId = productId;
+    }
 
-    public int getCategoryId() { return categoryId; }
-    public void setCategoryId(int categoryId) { this.categoryId = categoryId; }
+    public int getSellerId() {
+        return sellerId;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setSellerId(int sellerId) {
+        this.sellerId = sellerId;
+    }
 
-    public double getPrice() { return price; }
-    public void setPrice(double price) { this.price = price; }
+    public int getCategoryId() {
+        return categoryId;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setCategoryId(int categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }

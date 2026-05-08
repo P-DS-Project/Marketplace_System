@@ -1,4 +1,4 @@
-package utils;
+package Utils;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -42,7 +42,8 @@ public class DatabaseConnectionManager {
         return DriverManager.getConnection(NODE3_URL, USERNAME, PASSWORD);
     }
 
-    // --- Shutdown Hook (no pools to close with pure JDBC, but kept for interface consistency) ---
+    // --- Shutdown Hook (no pools to close with pure JDBC, but kept for interface
+    // consistency) ---
     public static void closeAllPools() {
         System.out.println("All database connections closed.");
     }

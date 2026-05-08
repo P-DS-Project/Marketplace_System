@@ -1,7 +1,4 @@
-package daos;
-
-import entities.ProductEntity;
-import utils.DatabaseConnectionManager;
+package DAOs;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,6 +6,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import Entities.ProductEntity;
+import Utils.DatabaseConnectionManager;
 
 public class ProductDAO {
 
@@ -20,7 +20,7 @@ public class ProductDAO {
         List<ProductEntity> products = new ArrayList<>();
         String sql = "SELECT product_id, seller_id, category_id, name, price, status FROM products WHERE seller_id = ?";
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, sellerId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {

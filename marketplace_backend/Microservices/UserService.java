@@ -1,15 +1,16 @@
-package microservices;
+package Microservices;
 
-import daos.UserDAO;
-import daos.AccountDAO;
-import daos.ProductDAO;
-import daos.TransactionDAO;
-import entities.UserEntity;
-import entities.AccountEntity;
-import entities.ProductEntity;
-import entities.TransactionEntity;
+import Entities.UserEntity;
+import Entities.AccountEntity;
+import Entities.ProductEntity;
+import Entities.TransactionEntity;
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import DAOs.AccountDAO;
+import DAOs.ProductDAO;
+import DAOs.TransactionDAO;
+import DAOs.UserDAO;
 
 import java.util.List;
 
@@ -30,8 +31,10 @@ public class UserService {
     }
 
     public String registerUser(String username, String email, String plainPassword, String role) {
-        if (username == null || username.length() < 3) return "ERROR: Username must be at least 3 characters.";
-        if (plainPassword == null || plainPassword.length() < 8) return "ERROR: Password must be at least 8 characters.";
+        if (username == null || username.length() < 3)
+            return "ERROR: Username must be at least 3 characters.";
+        if (plainPassword == null || plainPassword.length() < 8)
+            return "ERROR: Password must be at least 8 characters.";
 
         String salt = authService.generateCryptoSalt();
         String passwordHash = authService.hashPassword(plainPassword, salt);
@@ -76,7 +79,8 @@ public class UserService {
 
         // 1. Fetch from Node 1 (Users & Accounts)
         UserEntity user = userDao.findById(userId);
-        if (user == null) return "ERROR: User not found.";
+        if (user == null)
+            return "ERROR: User not found.";
         AccountEntity account = accountDao.getAccountByUserId(userId);
 
         // 2. Fetch from Node 2 (Products)
@@ -87,7 +91,7 @@ public class UserService {
 
         // Aggregate Data
         JSONObject response = new JSONObject();
-        
+
         JSONObject userData = new JSONObject();
         userData.put("userId", user.getUserId());
         userData.put("username", user.getUsername());

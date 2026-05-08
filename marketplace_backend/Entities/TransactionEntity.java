@@ -1,6 +1,4 @@
-package entities;
-
-import java.security.Timestamp;
+package Entities;
 
 public class TransactionEntity {
     private int transactionId;

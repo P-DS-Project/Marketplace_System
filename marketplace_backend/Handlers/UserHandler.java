@@ -1,7 +1,8 @@
-package handlers;
+package Handlers;
 
-import microservices.UserService;
 import org.json.JSONObject;
+
+import Microservices.UserService;
 
 public class UserHandler implements ServiceHandler {
 
@@ -27,8 +28,8 @@ public class UserHandler implements ServiceHandler {
                 String regUsername = json.optString("username", json.optString("name", null));
                 String regEmail = json.optString("email", null);
                 String regPassword = json.optString("password", null);
-                String regRole = json.optString("role", "BUYER"); // default role
-                
+                String regRole = json.optString("role", "buyer"); // default to "buyer" if not provided
+
                 String regResult = userService.registerUser(regUsername, regEmail, regPassword, regRole);
                 if (regResult.startsWith("SUCCESS")) {
                     return "200 {\"message\":\"" + regResult + "\"}";

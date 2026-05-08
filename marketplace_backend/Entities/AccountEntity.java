@@ -1,4 +1,4 @@
-package entities;
+package Entities;
 
 public class AccountEntity {
     private int accountId;
@@ -6,15 +6,35 @@ public class AccountEntity {
     private double balance;
     private String currency;
 
-    public int getAccountId() { return accountId; }
-    public void setAccountId(int accountId) { this.accountId = accountId; }
+    public int getAccountId() {
+        return accountId;
+    }
 
-    public int getUserId() { return userId; }
-    public void setUserId(int userId) { this.userId = userId; }
+    public void setAccountId(int accountId) {
+        this.accountId = accountId;
+    }
 
-    public double getBalance() { return balance; }
-    public void setBalance(double balance) { this.balance = balance; }
+    public int getUserId() {
+        return userId;
+    }
 
-    public String getCurrency() { return currency; }
-    public void setCurrency(String currency) { this.currency = currency; }
+    public void setUserId(int userId) {
+        this.userId = userId;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
 }

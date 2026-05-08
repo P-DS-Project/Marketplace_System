@@ -1,11 +1,11 @@
-package utils;
-
-import handlers.ServiceHandler;
-import handlers.UserHandler;
-import handlers.ProductHandler;
+package Utils;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import Handlers.ProductHandler;
+import Handlers.ServiceHandler;
+import Handlers.UserHandler;
 
 public class RequestRouter {
 
