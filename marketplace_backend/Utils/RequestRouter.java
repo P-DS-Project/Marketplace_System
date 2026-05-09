@@ -3,6 +3,7 @@ package Utils;
 import java.util.HashMap;
 import java.util.Map;
 
+import Handlers.ChatHandler;
 import Handlers.ProductHandler;
 import Handlers.ServiceHandler;
 import Handlers.UserHandler;
@@ -18,6 +19,7 @@ public class RequestRouter {
         // Register all your microservices here
         routingTable.put("USER", new UserHandler());
         routingTable.put("PRODUCT", new ProductHandler());
+        routingTable.put("CHAT", new ChatHandler());
         // routingTable.put("TRANSACTION", new TransactionHandler());
     }
 
