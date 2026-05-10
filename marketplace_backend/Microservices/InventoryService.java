@@ -2,6 +2,7 @@ package Microservices;
 
 import DAOs.InventoryDAO;
 import Entities.InventoryEntity;
+import org.json.JSONObject;
 
 public class InventoryService {
     private InventoryDAO inventoryDao;
@@ -36,7 +37,10 @@ public class InventoryService {
         if (inventory == null) {
             return "ERROR: Inventory not found for product ID " + productId;
         }
-        return "Product ID: " + inventory.getProductId() + ", Quantity: " + inventory.getQuantity()
-                + ", Warehouse Node: " + inventory.getWarehouse_node();
+        JSONObject json = new JSONObject();
+        json.put("productId", inventory.getProductId());
+        json.put("quantity", inventory.getQuantity());
+        json.put("warehouseNode", inventory.getWarehouse_node());
+        return "SUCCESS: " + json.toString();
     }
 }

@@ -30,20 +30,19 @@ public class InventoryDAO {
         try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, quantity);
             pstmt.setInt(2, productId);
-            pstmt.setString(3, warehouseNode);
-            pstmt.setInt(4, quantity);
+            pstmt.setInt(3, quantity);
+            pstmt.setString(4, warehouseNode);
 
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
     public boolean addStock(int productId, int quantity, String warehouseNode) {
-        String sql = "INSERT INTO inventory (product_id, quantity, warehouse_node) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE quantity = quantity + ?, warehouse_node = ?";
+        String sql = "INSERT INTO inventory (product_id, quantity, warehouse_node) VALUES (?, ?, ?) " +
+                     "ON CONFLICT (product_id) DO UPDATE SET quantity = inventory.quantity + EXCLUDED.quantity, warehouse_node = EXCLUDED.warehouse_node";
         try (Connection conn = getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, productId);
             pstmt.setInt(2, quantity);
             pstmt.setString(3, warehouseNode);
-            pstmt.setInt(4, quantity);
-            pstmt.setString(5, warehouseNode);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) { e.printStackTrace(); return false; }
     }
