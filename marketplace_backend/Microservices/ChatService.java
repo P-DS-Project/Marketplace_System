@@ -15,14 +15,8 @@ public class ChatService {
         this.chatMessageDao = new ChatMessageDAO();
     }
 
-    public String sendMessage(String jsonPayload) {
+    public String sendMessage(int senderId, int receiverId, String content) {
         try {
-            JSONObject json = new JSONObject(jsonPayload != null ? jsonPayload : "{}");
-
-            int senderId = json.optInt("senderId", -1);
-            int receiverId = json.optInt("receiverId", -1);
-            String content = json.optString("content", "");
-
             if (senderId == -1 || receiverId == -1) {
                 return "400 {\"error\":\"Missing senderId or receiverId\"}";
             }
@@ -48,13 +42,8 @@ public class ChatService {
         }
     }
 
-    public String getConversation(String jsonPayload) {
+    public String getConversation(int user1Id, int user2Id) {
         try {
-            JSONObject json = new JSONObject(jsonPayload != null ? jsonPayload : "{}");
-
-            int user1Id = json.optInt("user1Id", -1);
-            int user2Id = json.optInt("user2Id", -1);
-
             if (user1Id == -1 || user2Id == -1) {
                 return "400 {\"error\":\"Missing user1Id or user2Id\"}";
             }
@@ -82,13 +71,8 @@ public class ChatService {
         }
     }
 
-    public String startChat(String jsonPayload) {
+    public String startChat(int user1Id, int user2Id) {
         try {
-            JSONObject json = new JSONObject(jsonPayload != null ? jsonPayload : "{}");
-
-            int user1Id = json.optInt("user1Id", -1);
-            int user2Id = json.optInt("user2Id", -1);
-
             if (user1Id == -1 || user2Id == -1) {
                 return "400 {\"error\":\"Missing user1Id or user2Id\"}";
             }
@@ -102,12 +86,8 @@ public class ChatService {
         }
     }
 
-    public String listUserChats(String jsonPayload) {
+    public String listUserChats(int userId) {
         try {
-            JSONObject json = new JSONObject(jsonPayload != null ? jsonPayload : "{}");
-
-            int userId = json.optInt("userId", -1);
-
             if (userId == -1) {
                 return "400 {\"error\":\"Missing userId\"}";
             }
