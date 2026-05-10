@@ -144,4 +144,86 @@ public class ProductDAO {
             return false;
         }
     }
+    public List<ProductEntity> advancedSearch(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String brand, Integer sellerId, String startDate, String endDate, String sortBy, String sortOrder, int limit, int offset) {
+        List<ProductEntity> products = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT product_id, seller_id, category_id, name, brand, price, status, description, created_at FROM products WHERE 1=1");
+        List<Object> params = new ArrayList<>();
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND name ILIKE ?");
+            params.add("%" + keyword.trim() + "%");
+        }
+        if (categoryId != null) {
+            sql.append(" AND category_id = ?");
+            params.add(categoryId);
+        }
+        if (minPrice != null) {
+            sql.append(" AND price >= ?");
+            params.add(minPrice);
+        }
+        if (maxPrice != null) {
+            sql.append(" AND price <= ?");
+            params.add(maxPrice);
+        }
+        if (brand != null && !brand.trim().isEmpty()) {
+            sql.append(" AND brand ILIKE ?");
+            params.add("%" + brand.trim() + "%");
+        }
+        if (sellerId != null) {
+            sql.append(" AND seller_id = ?");
+            params.add(sellerId);
+        }
+        if (startDate != null && !startDate.trim().isEmpty()) {
+            sql.append(" AND created_at >= ?::timestamp");
+            params.add(startDate);
+        }
+        if (endDate != null && !endDate.trim().isEmpty()) {
+            sql.append(" AND created_at <= ?::timestamp");
+            params.add(endDate);
+        }
+
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            String safeSortBy = "created_at"; 
+            if (sortBy.equalsIgnoreCase("price")) safeSortBy = "price";
+            else if (sortBy.equalsIgnoreCase("name")) safeSortBy = "name";
+            
+            String safeOrder = "DESC";
+            if ("ASC".equalsIgnoreCase(sortOrder)) safeOrder = "ASC";
+            
+            sql.append(" ORDER BY ").append(safeSortBy).append(" ").append(safeOrder);
+        } else {
+             sql.append(" ORDER BY created_at DESC");
+        }
+
+        sql.append(" LIMIT ? OFFSET ?");
+        params.add(limit > 0 ? limit : 20);
+        params.add(offset >= 0 ? offset : 0);
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+            
+            for (int i = 0; i < params.size(); i++) {
+                pstmt.setObject(i + 1, params.get(i));
+            }
+            
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    ProductEntity p = new ProductEntity();
+                    p.setProductId(rs.getInt("product_id"));
+                    p.setSellerId(rs.getInt("seller_id"));
+                    p.setCategoryId(rs.getInt("category_id"));
+                    p.setName(rs.getString("name"));
+                    p.setBrand(rs.getString("brand"));
+                    p.setPrice(rs.getDouble("price"));
+                    p.setStatus(rs.getString("status"));
+                    p.setDescription(rs.getString("description"));
+                    p.setCreatedAt(rs.getTimestamp("created_at"));
+                    products.add(p);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return products;
+    }
 }

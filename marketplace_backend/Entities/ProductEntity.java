@@ -8,6 +8,8 @@ public class ProductEntity {
     private double price;
     private String status;
     private String description;
+    private String brand;
+    private java.sql.Timestamp createdAt;
 
     public int getProductId() {
         return productId;
@@ -63,5 +65,21 @@ public class ProductEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public java.sql.Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.sql.Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 }
