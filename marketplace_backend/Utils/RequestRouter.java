@@ -8,6 +8,7 @@ import Handlers.ServiceHandler;
 import Handlers.UserHandler;
 import Handlers.TransactionHandler;
 import Handlers.InventoryHandler;
+import Handlers.SearchHandler;
 // import Handlers.ReportHandler;
 
 public class RequestRouter {
@@ -22,6 +23,7 @@ public class RequestRouter {
         routingTable.put("CHAT", new ChatHandler());
         routingTable.put("TRANSACTION", new TransactionHandler());
         routingTable.put("INVENTORY", new InventoryHandler());
+        routingTable.put("SEARCH", new SearchHandler());
         // routingTable.put("REPORT", new ReportHandler());
     }
 
