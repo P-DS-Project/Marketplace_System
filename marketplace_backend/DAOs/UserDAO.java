@@ -69,8 +69,6 @@ public class UserDAO {
         return user;
     }
 
-    // 2. WRITE: Insert a new user (incorporating the unique lookup tables we
-    // discussed)
     public int createUser(String username, String email, String passwordHash, String salt, String role) {
         String insertUser = "INSERT INTO users (username, email, password_hash, salt, role) VALUES (?, ?, ?, ?, ?)";
         String insertEmail = "INSERT INTO unique_emails (email, user_id) VALUES (?, ?)";
@@ -81,9 +79,6 @@ public class UserDAO {
             try {
                 int generatedUserId = -1;
 
-                // Step A: Insert the actual user data and get the generated user_id
-                // Note: The unique constraint on 'users' table will naturally handle username
-                // uniqueness
                 try (PreparedStatement psMain = conn.prepareStatement(insertUser,
                         PreparedStatement.RETURN_GENERATED_KEYS)) {
                     psMain.setString(1, username);
@@ -95,8 +90,7 @@ public class UserDAO {
 
                     try (ResultSet rs = psMain.getGeneratedKeys()) {
                         if (rs.next()) {
-                            // PostgreSQL getGeneratedKeys usually returns all columns or the id depending
-                            // on the driver
+
                             generatedUserId = rs.getInt(1);
                         } else {
                             throw new SQLException("Creating user failed, no ID obtained.");
@@ -104,18 +98,17 @@ public class UserDAO {
                     }
                 }
 
-                // Step B: Enforce global email uniqueness by inserting into the lookup table
                 try (PreparedStatement psEmail = conn.prepareStatement(insertEmail)) {
                     psEmail.setString(1, email);
                     psEmail.setInt(2, generatedUserId);
                     psEmail.executeUpdate();
                 }
 
-                conn.commit(); // Success! Commit inserts.
+                conn.commit();
                 return generatedUserId;
 
             } catch (SQLException e) {
-                conn.rollback(); // Conflict! Rollback everything.
+                conn.rollback();
                 System.err.println("Failed to create user. Email or Username may exist.");
                 System.err.println("SQL Error: " + e.getMessage());
                 return -1;

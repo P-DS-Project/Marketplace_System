@@ -2,7 +2,6 @@ package Entities;
 
 public class UserEntity {
 
-    // These variables match the columns in your Node 1 'users' table
     private int userId;
     private String username;
     private String email;
@@ -11,12 +10,8 @@ public class UserEntity {
     private String role;
     private boolean isVerified;
 
-    // Empty constructor (often required by frameworks, but good practice in pure
-    // Java too)
     public UserEntity() {
     }
-
-    // --- Getters and Setters ---
 
     public int getUserId() {
         return userId;
@@ -74,14 +69,4 @@ public class UserEntity {
         isVerified = verified;
     }
 
-    // Optional: A toString() method makes debugging much easier!
-    @Override
-    public String toString() {
-        return "UserEntity{" +
-                "userId=" + userId +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", role='" + role + '\'' +
-                '}';
-    }
 }
