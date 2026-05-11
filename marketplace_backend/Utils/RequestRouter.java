@@ -9,7 +9,7 @@ import Handlers.UserHandler;
 import Handlers.TransactionHandler;
 import Handlers.InventoryHandler;
 import Handlers.SearchHandler;
-// import Handlers.ReportHandler;
+import Handlers.ReportHandler;
 
 public class RequestRouter {
 
@@ -24,7 +24,7 @@ public class RequestRouter {
         routingTable.put("TRANSACTION", new TransactionHandler());
         routingTable.put("INVENTORY", new InventoryHandler());
         routingTable.put("SEARCH", new SearchHandler());
-        // routingTable.put("REPORT", new ReportHandler());
+        routingTable.put("REPORT", new ReportHandler());
     }
 
     public String route(String serviceDomain, String action, String jsonPayload) {

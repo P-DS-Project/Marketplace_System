@@ -1,90 +1,65 @@
-// package Handlers;
-// import Handlers.ServiceHandler;
-// import Microservices.ReportService;
+package Handlers;
 
-// public class ReportHandler implements ServiceHandler {
-// private final ReportService reportService;
+import Microservices.ReportService;
+import org.json.JSONObject;
 
-// public ReportHandler() {
-// this.reportService = new ReportService();
-// }
+public class ReportHandler implements ServiceHandler {
+    private final ReportService reportService;
 
-// @Override
-// public String handleRequest(String action, String jsonPayload) {
+    public ReportHandler() {
+        this.reportService = new ReportService();
+    }
 
-// switch (action.toUpperCase()) {
+    @Override
+    public String handleRequest(String action, String jsonPayload) {
+        JSONObject json;
+        try {
+            json = new JSONObject(jsonPayload != null ? jsonPayload : "{}");
+        } catch (Exception e) {
+            return "400 {\"error\":\"Invalid JSON payload format\"}";
+        }
 
-// // ==============================
-// // TRANSACTION REPORTS
-// // ==============================
+        switch (action.toUpperCase()) {
 
-// case "GENERATE_TRANSACTION_REPORT":
-// return reportService.generateTransactionReport(jsonPayload);
+            case "GET_TRANSACTION_HISTORY": {
+                int userId = json.optInt("userId", -1);
+                if (userId == -1) {
+                    return "400 {\"error\":\"Missing userId\"}";
+                }
+                String result = reportService.getTransactionHistory(userId);
+                return formatResponse(result);
+            }
 
-// case "GET_TRANSACTION_HISTORY":
-// return reportService.getTransactionHistory(jsonPayload);
+            case "GET_SALES_REPORT": {
+                int sellerId = json.optInt("sellerId", -1);
+                if (sellerId == -1) {
+                    return "400 {\"error\":\"Missing sellerId\"}";
+                }
+                String result = reportService.getSalesReport(sellerId);
+                return formatResponse(result);
+            }
 
-// case "GET_PURCHASE_REPORT":
-// return reportService.getPurchaseReport(jsonPayload);
+            case "GET_INVENTORY_REPORT": {
+                String result = reportService.getInventoryReport();
+                return formatResponse(result);
+            }
 
-// case "GET_SALES_REPORT":
-// return reportService.getSalesReport(jsonPayload);
+            case "GET_SYSTEM_STATISTICS": {
+                String result = reportService.getSystemStatistics();
+                return formatResponse(result);
+            }
 
-// // ==============================
-// // INVENTORY REPORTS
-// // ==============================
+            default:
+                return "400 {\"error\":\"Unknown Report Action: " + action + "\"}";
+        }
+    }
 
-// case "GET_INVENTORY_REPORT":
-// return reportService.getInventoryReport(jsonPayload);
-
-// case "GET_AVAILABLE_ITEMS_REPORT":
-// return reportService.getAvailableItemsReport(jsonPayload);
-
-// case "GET_SOLD_ITEMS_REPORT":
-// return reportService.getSoldItemsReport(jsonPayload);
-
-// // ==============================
-// // USER ACCOUNT REPORTS
-// // ==============================
-
-// case "GET_ACCOUNT_SUMMARY":
-// return reportService.getAccountSummary(jsonPayload);
-
-// case "GET_BALANCE_REPORT":
-// return reportService.getBalanceReport(jsonPayload);
-
-// case "GET_USER_ACTIVITY_REPORT":
-// return reportService.getUserActivityReport(jsonPayload);
-
-// // ==============================
-// // ADMIN REPORTS
-// // ==============================
-
-// case "GET_SYSTEM_STATISTICS":
-// return reportService.getSystemStatistics(jsonPayload);
-
-// case "GET_TOP_SELLERS_REPORT":
-// return reportService.getTopSellersReport(jsonPayload);
-
-// case "GET_TOP_BUYERS_REPORT":
-// return reportService.getTopBuyersReport(jsonPayload);
-
-// case "GET_TOTAL_REVENUE_REPORT":
-// return reportService.getTotalRevenueReport(jsonPayload);
-
-// // ==============================
-// // CHAT / BONUS FEATURE REPORTS
-// // ==============================
-
-// case "GET_CHAT_ACTIVITY_REPORT":
-// return reportService.getChatActivityReport(jsonPayload);
-
-// // ==============================
-// // DEFAULT
-// // ==============================
-
-// default:
-// return "{ \"status\": \"error\", \"message\": \"Invalid Report Action\" }";
-// }
-// }
-// }
+    private String formatResponse(String result) {
+        if (result.startsWith("SUCCESS ")) {
+            return "200 " + result.substring(8);
+        } else if (result.startsWith("ERROR")) {
+            return "400 {\"error\":\"" + result + "\"}";
+        }
+        return "200 " + result;
+    }
+}

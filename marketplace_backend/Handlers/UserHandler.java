@@ -28,7 +28,7 @@ public class UserHandler implements ServiceHandler {
                 String regUsername = json.optString("username", json.optString("name", null));
                 String regEmail = json.optString("email", null);
                 String regPassword = json.optString("password", null);
-                String regRole = json.optString("role", "buyer"); // default to "buyer" if not provided
+                String regRole = json.optString("role", "BUYER").toUpperCase(); // DB CHECK constraint expects uppercase
 
                 String regResult = userService.registerUser(regUsername, regEmail, regPassword, regRole);
                 if (regResult.startsWith("SUCCESS")) {
