@@ -64,6 +64,87 @@ public class UserApiService {
         return null;
     }
 
+    public String updateProfile(String token, String username, String email, String avatarUrl) {
+        JSONObject payload = new JSONObject();
+        payload.put("token", token);
+        payload.put("username", username);
+        payload.put("email", email);
+        if (avatarUrl != null) payload.put("avatarUrl", avatarUrl);
+
+        String response = client.sendRequest("USER", "UPDATE_PROFILE", payload);
+        int code = SocketClient.getStatusCode(response);
+        JSONObject body = SocketClient.getResponseBody(response);
+
+        if (code == 200) {
+            return body.optString("message", "Profile updated");
+        }
+        return "ERROR: " + body.optString("error", "Failed to update profile");
+    }
+
+    public String changePassword(String token, String oldPassword, String newPassword) {
+        JSONObject payload = new JSONObject();
+        payload.put("token", token);
+        payload.put("oldPassword", oldPassword);
+        payload.put("newPassword", newPassword);
+
+        String response = client.sendRequest("USER", "CHANGE_PASSWORD", payload);
+        int code = SocketClient.getStatusCode(response);
+        JSONObject body = SocketClient.getResponseBody(response);
+
+        if (code == 200) {
+            return body.optString("message", "Password changed");
+        }
+        return "ERROR: " + body.optString("error", "Failed to change password");
+    }
+
+    public String deleteAccount(String token) {
+        JSONObject payload = new JSONObject();
+        payload.put("token", token);
+
+        String response = client.sendRequest("USER", "DELETE_ACCOUNT", payload);
+        int code = SocketClient.getStatusCode(response);
+        JSONObject body = SocketClient.getResponseBody(response);
+
+        if (code == 200) {
+            return body.optString("message", "Account deleted");
+        }
+        return "ERROR: " + body.optString("error", "Failed to delete account");
+    }
+
+    public JSONObject deposit(int userId, double amount) {
+        JSONObject payload = new JSONObject();
+        payload.put("userId", userId);
+        payload.put("amount", amount);
+
+        String response = client.sendRequest("TRANSACTION", "DEPOSIT", payload);
+        int code = SocketClient.getStatusCode(response);
+        JSONObject body = SocketClient.getResponseBody(response);
+
+        JSONObject result = new JSONObject();
+        if (code == 200) {
+            result.put("success", true);
+            result.put("message", body.optString("message", "Deposit successful"));
+            result.put("newBalance", body.optDouble("newBalance", 0));
+        } else {
+            result.put("success", false);
+            result.put("error", body.optString("error", "Deposit failed"));
+        }
+        return result;
+    }
+
+    public String getUsername(int userId) {
+        JSONObject payload = new JSONObject();
+        payload.put("userId", userId);
+
+        String response = client.sendRequest("USER", "GET_USERNAME", payload);
+        int code = SocketClient.getStatusCode(response);
+        if (code == 200) {
+            JSONObject body = SocketClient.getResponseBody(response);
+            return body.optString("username", "User #" + userId);
+        }
+        return "User #" + userId;
+    }
+
     public User parseUser(JSONObject infoData) {
         if (infoData == null || !infoData.has("user")) return null;
         JSONObject u = infoData.getJSONObject("user");
@@ -71,7 +152,7 @@ public class UserApiService {
         user.setUserId(u.optInt("userId", -1));
         user.setUsername(u.optString("username", ""));
         user.setEmail(u.optString("email", ""));
-        user.setRole(u.optString("role", "buyer"));
+        user.setRole(u.optString("role", "USER"));
         return user;
     }
 
@@ -96,6 +177,7 @@ public class UserApiService {
             prod.setName(p.optString("name", ""));
             prod.setPrice(p.optDouble("price", 0));
             prod.setStatus(p.optString("status", ""));
+            prod.setImageUrl(p.optString("imageUrl", ""));
             list.add(prod);
         }
         return list;
@@ -112,6 +194,7 @@ public class UserApiService {
             tx.setAmount(t.optDouble("amount", 0));
             tx.setType(t.optString("type", ""));
             tx.setStatus(t.optString("status", ""));
+            tx.setCreatedAt(t.optString("createdAt", ""));
             list.add(tx);
         }
         return list;

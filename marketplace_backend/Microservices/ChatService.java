@@ -1,6 +1,7 @@
 package Microservices;
 
 import DAOs.ChatMessageDAO;
+import DAOs.UserDAO;
 import Entities.ChatMessageEntity;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -10,9 +11,11 @@ import java.util.List;
 public class ChatService {
 
     private final ChatMessageDAO chatMessageDao;
+    private final UserDAO userDao;
 
     public ChatService() {
         this.chatMessageDao = new ChatMessageDAO();
+        this.userDao = new UserDAO();
     }
 
     public String sendMessage(int senderId, int receiverId, String content) {
@@ -92,11 +95,48 @@ public class ChatService {
                 return "400 {\"error\":\"Missing userId\"}";
             }
 
+            List<int[]> partners = chatMessageDao.getDistinctConversations(userId);
+            JSONArray chats = new JSONArray();
+
+            for (int[] partner : partners) {
+                int partnerId = partner[0];
+                JSONObject chatObj = new JSONObject();
+                chatObj.put("partnerId", partnerId);
+                chatObj.put("partnerName", userDao.getUsernameById(partnerId));
+
+                int unread = chatMessageDao.getUnreadCount(userId, partnerId);
+                chatObj.put("unreadCount", unread);
+
+                ChatMessageEntity lastMsg = chatMessageDao.getLastMessage(userId, partnerId);
+                if (lastMsg != null) {
+                    chatObj.put("lastMessage", lastMsg.getContent());
+                    chatObj.put("lastMessageTime", lastMsg.getTimestamp());
+                    chatObj.put("lastMessageSenderId", lastMsg.getSenderId());
+                } else {
+                    chatObj.put("lastMessage", "");
+                    chatObj.put("lastMessageTime", "");
+                    chatObj.put("lastMessageSenderId", 0);
+                }
+
+                chats.put(chatObj);
+            }
+
             JSONObject res = new JSONObject();
-            res.put("message", "Chat list retrieved for user " + userId);
-            res.put("chats", new JSONArray());
+            res.put("chats", chats);
             return "200 " + res.toString();
 
+        } catch (Exception e) {
+            return "400 {\"error\":\"Invalid request: " + e.getMessage() + "\"}";
+        }
+    }
+
+    public String markAsRead(int userId, int fromUserId) {
+        try {
+            boolean success = chatMessageDao.markAsRead(userId, fromUserId);
+            if (success) {
+                return "200 {\"message\":\"Messages marked as read\"}";
+            }
+            return "400 {\"error\":\"Failed to mark messages as read\"}";
         } catch (Exception e) {
             return "400 {\"error\":\"Invalid request: " + e.getMessage() + "\"}";
         }

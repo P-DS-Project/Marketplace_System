@@ -7,6 +7,10 @@ import utils.ThemeManager;
 import views.LoginView;
 import views.MainLayout;
 import views.NavigationController;
+import services.UserApiService;
+import models.User;
+import models.Account;
+import org.json.JSONObject;
 
 public class Main extends Application {
 
@@ -23,14 +27,44 @@ public class Main extends Application {
         stage.setMinWidth(1024);
         stage.setMinHeight(700);
 
-        // Initialize navigation controller
         NavigationController.init(stage, Main::showLogin, Main::showMainApp);
 
-        // Connect to backend
         SocketClient.getInstance().connect(SERVER_HOST, SERVER_PORT);
 
-        showLogin();
+        if (!tryRestoreSession()) {
+            showLogin();
+        }
+
         stage.show();
+    }
+
+    private boolean tryRestoreSession() {
+        SessionManager sm = SessionManager.getInstance();
+        String savedToken = sm.loadSavedToken();
+
+        if (savedToken == null) return false;
+
+        try {
+            UserApiService userApi = new UserApiService();
+            JSONObject info = userApi.getInfo(savedToken);
+            if (info == null) {
+                sm.clearSavedSession();
+                return false;
+            }
+
+            User user = userApi.parseUser(info);
+            Account account = userApi.parseAccount(info);
+
+            sm.setToken(savedToken);
+            sm.setCurrentUser(user);
+            sm.setAccount(account);
+
+            showMainApp();
+            return true;
+        } catch (Exception e) {
+            sm.clearSavedSession();
+            return false;
+        }
     }
 
     public static void showLogin() {

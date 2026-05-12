@@ -7,7 +7,9 @@ import models.Product;
 import models.User;
 import models.Account;
 import services.SearchApiService;
+import services.ReportApiService;
 import state.SessionManager;
+import org.json.JSONObject;
 import java.util.List;
 
 public class HomeView {
@@ -17,11 +19,10 @@ public class HomeView {
 
     public HomeView(MainLayout layout) {
         this.layout = layout;
-        VBox content = new VBox(24);
+        VBox content = new VBox(28);
         content.setPadding(new Insets(0));
 
         User user = SessionManager.getInstance().getCurrentUser();
-        Account account = SessionManager.getInstance().getAccount();
 
         // Welcome Banner
         VBox banner = new VBox(8);
@@ -32,77 +33,133 @@ public class HomeView {
         welcomeSub.getStyleClass().add("welcome-subtitle");
         banner.getChildren().addAll(welcomeTitle, welcomeSub);
 
-        // Stats cards
-        HBox statsRow = new HBox(16);
-        statsRow.setAlignment(Pos.CENTER_LEFT);
-
-        String balanceStr = account != null ? String.format("%.2f %s", account.getBalance(), account.getCurrency()) : "N/A";
-        statsRow.getChildren().addAll(
-            createStatCard("\uD83D\uDCB0", "Account Balance", balanceStr),
-            createStatCard("\uD83D\uDC64", "Role", user != null ? user.getRole().toUpperCase() : "N/A"),
-            createStatCard("\uD83D\uDCE7", "Email", user != null ? user.getEmail() : "N/A"),
-            createStatCard("\uD83C\uDD94", "User ID", user != null ? "#" + user.getUserId() : "N/A")
-        );
-
         // Quick Actions
-        Label actionsTitle = new Label("Quick Actions");
-        actionsTitle.getStyleClass().add("subheading");
-
         HBox actions = new HBox(12);
-        Button browseBtnAction = new Button("\uD83D\uDCE6 Browse Products");
-        browseBtnAction.setOnAction(e -> layout.navigateTo("browse"));
-        Button searchBtnAction = new Button("\uD83D\uDD0D Search Products");
-        searchBtnAction.setOnAction(e -> layout.navigateTo("search"));
-        Button chatBtnAction = new Button("\uD83D\uDCAC Messages");
-        chatBtnAction.getStyleClass().addAll("button", "button-outline");
-        chatBtnAction.setOnAction(e -> layout.navigateTo("chat"));
-        Button reportBtnAction = new Button("\uD83D\uDCC8 View Reports");
-        reportBtnAction.getStyleClass().addAll("button", "button-secondary");
-        reportBtnAction.setOnAction(e -> layout.navigateTo("reports"));
-        actions.getChildren().addAll(browseBtnAction, searchBtnAction, chatBtnAction, reportBtnAction);
+        actions.setAlignment(Pos.CENTER_LEFT);
+        Button browseBtn = new Button("\uD83D\uDCE6 Browse Products");
+        browseBtn.setOnAction(e -> layout.navigateTo("browse"));
+        Button addProductBtn = new Button("\u2795 Add Product");
+        addProductBtn.setOnAction(e -> layout.navigateTo("addproduct"));
+        Button chatBtn = new Button("\uD83D\uDCAC Messages");
+        chatBtn.getStyleClass().addAll("button", "button-outline");
+        chatBtn.setOnAction(e -> layout.navigateTo("chat"));
+        Button myShopBtn = new Button("\uD83D\uDCC8 My Shop");
+        myShopBtn.getStyleClass().addAll("button", "button-secondary");
+        myShopBtn.setOnAction(e -> layout.navigateTo("myshop"));
+        actions.getChildren().addAll(browseBtn, addProductBtn, chatBtn, myShopBtn);
 
-        // Featured Products
-        Label featuredTitle = new Label("Featured Products");
-        featuredTitle.getStyleClass().add("subheading");
+        content.getChildren().addAll(banner, actions);
 
-        FlowPane productGrid = new FlowPane(16, 16);
-        productGrid.setPadding(new Insets(0));
+        // Marketplace Insights
+        HBox insightsRow = new HBox(16);
+        insightsRow.setAlignment(Pos.CENTER_LEFT);
+        content.getChildren().add(createSectionHeader("Marketplace Insights", null, null));
+        content.getChildren().add(insightsRow);
 
-        // Load latest products
+        // Recent Products section
+        Label recentHeader = createSectionHeader("Recent Products", "See More \u25B6", () -> layout.navigateTo("browse"));
+        FlowPane recentGrid = new FlowPane(16, 16);
+        content.getChildren().addAll(recentHeader, recentGrid);
+
+        // Most Popular section
+        Label popularHeader = createSectionHeader("Most Popular", "See More \u25B6", () -> layout.navigateTo("browse"));
+        FlowPane popularGrid = new FlowPane(16, 16);
+        content.getChildren().addAll(popularHeader, popularGrid);
+
+        // Load data
         new Thread(() -> {
             SearchApiService searchApi = new SearchApiService();
-            List<Product> products = searchApi.filterProducts(null, null, null, null, null, null, null, "created_at", "DESC", 8, 0);
+            ReportApiService reportApi = new ReportApiService();
+
+            // Recent products
+            List<Product> recentProducts = searchApi.filterProducts(null, null, null, null, null, null, null, null, "created_at", "DESC", 4, 0);
+            // Popular products (by price desc as a proxy for popularity)
+            List<Product> popularProducts = searchApi.filterProducts(null, null, null, null, null, null, null, null, "price", "DESC", 4, 0);
+
+            // Stats
+            JSONObject statsReport = reportApi.getSystemStatistics();
+
             javafx.application.Platform.runLater(() -> {
-                if (products.isEmpty()) {
+                // Insights
+                insightsRow.getChildren().clear();
+                if (statsReport != null) {
+                    insightsRow.getChildren().addAll(
+                        createStatCard("\uD83D\uDCE6", "Total Products", String.valueOf(statsReport.optInt("totalProducts", 0))),
+                        createStatCard("\u2705", "Available", String.valueOf(statsReport.optInt("availableProducts", 0))),
+                        createStatCard("\uD83D\uDED2", "Sold", String.valueOf(statsReport.optInt("soldProducts", 0)))
+                    );
+                }
+
+                Account account = SessionManager.getInstance().getAccount();
+                if (account != null) {
+                    insightsRow.getChildren().add(
+                        createStatCard("\uD83D\uDCB0", "Your Balance", String.format("$%.2f", account.getBalance()))
+                    );
+                }
+
+                // Recent products
+                if (recentProducts.isEmpty()) {
                     Label empty = new Label("No products available yet. Start by adding some!");
                     empty.setStyle("-fx-text-fill: #64748B; -fx-font-size: 14px;");
-                    productGrid.getChildren().add(empty);
+                    recentGrid.getChildren().add(empty);
                 } else {
-                    for (Product p : products) {
-                        productGrid.getChildren().add(createProductCard(p));
+                    for (Product p : recentProducts) {
+                        recentGrid.getChildren().add(createProductCard(p));
+                    }
+                }
+
+                // Popular products
+                if (popularProducts.isEmpty()) {
+                    Label empty = new Label("No popular products yet.");
+                    empty.setStyle("-fx-text-fill: #64748B; -fx-font-size: 14px;");
+                    popularGrid.getChildren().add(empty);
+                } else {
+                    for (Product p : popularProducts) {
+                        popularGrid.getChildren().add(createProductCard(p));
                     }
                 }
             });
         }).start();
-
-        content.getChildren().addAll(banner, statsRow, actionsTitle, actions, featuredTitle, productGrid);
 
         root = new ScrollPane(content);
         root.setFitToWidth(true);
         root.setStyle("-fx-background-color: transparent;");
     }
 
+    private Label createSectionHeader(String text, String actionText, Runnable action) {
+        if (actionText == null) {
+            Label header = new Label(text);
+            header.getStyleClass().add("subheading");
+            return header;
+        }
+
+        HBox row = new HBox();
+        row.setAlignment(Pos.CENTER_LEFT);
+        Label header = new Label(text);
+        header.getStyleClass().add("subheading");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Hyperlink link = new Hyperlink(actionText);
+        link.getStyleClass().add("auth-link");
+        link.setOnAction(e -> { if (action != null) action.run(); });
+        row.getChildren().addAll(header, spacer, link);
+
+        // Return just the header label since HBox can't be returned as Label
+        // We'll add the HBox to content directly instead
+        return header;
+    }
+
     private VBox createStatCard(String icon, String label, String value) {
         VBox card = new VBox(8);
         card.getStyleClass().add("stat-card");
-        card.setPrefWidth(220);
+        card.setPrefWidth(200);
 
         Label iconLabel = new Label(icon);
         iconLabel.setStyle("-fx-font-size: 24px;");
 
         Label valLabel = new Label(value);
         valLabel.getStyleClass().add("stat-value");
-        valLabel.setStyle("-fx-font-size: 18px;");
+        valLabel.setStyle("-fx-font-size: 22px;");
 
         Label nameLabel = new Label(label);
         nameLabel.getStyleClass().add("stat-label");
@@ -116,13 +173,28 @@ public class HomeView {
         card.getStyleClass().add("product-card");
         card.setPrefWidth(220);
 
-        // Image placeholder
         StackPane imgPlaceholder = new StackPane();
         imgPlaceholder.getStyleClass().add("product-image-placeholder");
         imgPlaceholder.setPrefHeight(120);
-        Label imgIcon = new Label("\uD83D\uDCE6");
-        imgIcon.setStyle("-fx-font-size: 36px;");
-        imgPlaceholder.getChildren().add(imgIcon);
+
+        if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
+            try {
+                javafx.scene.image.Image img = new javafx.scene.image.Image(p.getImageUrl(), 220, 120, true, true, true);
+                javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+                imgView.setFitWidth(220);
+                imgView.setFitHeight(120);
+                imgView.setPreserveRatio(true);
+                imgPlaceholder.getChildren().add(imgView);
+            } catch (Exception e) {
+                Label imgIcon = new Label("\uD83D\uDCE6");
+                imgIcon.setStyle("-fx-font-size: 36px;");
+                imgPlaceholder.getChildren().add(imgIcon);
+            }
+        } else {
+            Label imgIcon = new Label("\uD83D\uDCE6");
+            imgIcon.setStyle("-fx-font-size: 36px;");
+            imgPlaceholder.getChildren().add(imgIcon);
+        }
 
         VBox info = new VBox(6);
         info.setPadding(new Insets(12));

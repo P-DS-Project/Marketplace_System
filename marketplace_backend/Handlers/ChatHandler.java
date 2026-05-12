@@ -47,6 +47,15 @@ public class ChatHandler implements ServiceHandler {
                 return chatService.listUserChats(userId);
             }
 
+            case "MARK_AS_READ": {
+                int userId = json.optInt("userId", -1);
+                int fromUserId = json.optInt("fromUserId", -1);
+                if (userId == -1 || fromUserId == -1) {
+                    return "400 {\"error\":\"Missing userId or fromUserId\"}";
+                }
+                return chatService.markAsRead(userId, fromUserId);
+            }
+
             default:
                 return "400 {\"error\":\"Unknown Chat Action: " + action + "\"}";
         }

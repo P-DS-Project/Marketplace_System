@@ -36,13 +36,20 @@ public class UserService {
         if (plainPassword == null || plainPassword.length() < 8)
             return "ERROR: Password must be at least 8 characters.";
 
+        if (role == null || role.trim().isEmpty()) {
+            role = "USER";
+        }
+        role = role.toUpperCase().replace(" ", "_");
+        if (!"USER".equals(role) && !"EXTERNAL_STORE".equals(role) && !"ADMIN".equals(role)) {
+            role = "USER";
+        }
+
         String salt = authService.generateCryptoSalt();
         String passwordHash = authService.hashPassword(plainPassword, salt);
 
         int userId = userDao.createUser(username, email, passwordHash, salt, role);
 
         if (userId != -1) {
-            // Immediately create a linked account for the user on Node 1
             accountDao.createAccount(userId);
             return "SUCCESS: User registered.";
         } else {
@@ -77,19 +84,15 @@ public class UserService {
             return "ERROR: Invalid or expired token.";
         }
 
-        // 1. Fetch from Node 1 (Users & Accounts)
         UserEntity user = userDao.findById(userId);
         if (user == null)
             return "ERROR: User not found.";
         AccountEntity account = accountDao.getAccountByUserId(userId);
 
-        // 2. Fetch from Node 2 (Products)
         List<ProductEntity> products = productDao.getProductsBySellerId(userId);
 
-        // 3. Fetch from Node 3 (Transactions)
         List<TransactionEntity> transactions = transactionDao.getTransactionsByUserId(userId);
 
-        // Aggregate Data
         JSONObject response = new JSONObject();
 
         JSONObject userData = new JSONObject();
@@ -97,6 +100,7 @@ public class UserService {
         userData.put("username", user.getUsername());
         userData.put("email", user.getEmail());
         userData.put("role", user.getRole());
+        userData.put("avatarUrl", user.getAvatarUrl() != null ? user.getAvatarUrl() : "");
         response.put("user", userData);
 
         if (account != null) {
@@ -114,6 +118,7 @@ public class UserService {
             pObj.put("name", p.getName());
             pObj.put("price", p.getPrice());
             pObj.put("status", p.getStatus());
+            pObj.put("imageUrl", p.getImageUrl() != null ? p.getImageUrl() : "");
             prodArray.put(pObj);
         }
         response.put("products", prodArray);
@@ -125,10 +130,55 @@ public class UserService {
             tObj.put("amount", t.getAmount());
             tObj.put("type", t.getType());
             tObj.put("status", t.getStatus());
+            tObj.put("createdAt", t.getCreated_at() != null ? t.getCreated_at() : "");
             txArray.put(tObj);
         }
         response.put("transactions", txArray);
 
         return "SUCCESS: " + response.toString();
+    }
+
+    public String updateProfile(String token, String username, String email, String avatarUrl) {
+        int userId = authService.extractUserIdFromToken(token);
+        if (userId == -1) return "ERROR: Invalid token.";
+
+        if (username == null || username.length() < 3) return "ERROR: Username must be at least 3 characters.";
+
+        boolean success = userDao.updateProfile(userId, username, email, avatarUrl);
+        return success ? "SUCCESS: Profile updated." : "ERROR: Failed to update profile.";
+    }
+
+    public String changePassword(String token, String oldPassword, String newPassword) {
+        int userId = authService.extractUserIdFromToken(token);
+        if (userId == -1) return "ERROR: Invalid token.";
+
+        UserEntity user = userDao.findById(userId);
+        if (user == null) return "ERROR: User not found.";
+
+        String expectedHash = authService.hashPassword(oldPassword, user.getSalt());
+        if (!expectedHash.equals(user.getPasswordHash())) {
+            return "ERROR: Current password is incorrect.";
+        }
+
+        if (newPassword == null || newPassword.length() < 8) {
+            return "ERROR: New password must be at least 8 characters.";
+        }
+
+        String newSalt = authService.generateCryptoSalt();
+        String newHash = authService.hashPassword(newPassword, newSalt);
+        boolean success = userDao.updatePassword(userId, newHash, newSalt);
+        return success ? "SUCCESS: Password changed." : "ERROR: Failed to change password.";
+    }
+
+    public String deleteAccount(String token) {
+        int userId = authService.extractUserIdFromToken(token);
+        if (userId == -1) return "ERROR: Invalid token.";
+
+        boolean success = userDao.deleteUser(userId);
+        return success ? "SUCCESS: Account deleted." : "ERROR: Failed to delete account.";
+    }
+
+    public String getUsernameById(int userId) {
+        return userDao.getUsernameById(userId);
     }
 }

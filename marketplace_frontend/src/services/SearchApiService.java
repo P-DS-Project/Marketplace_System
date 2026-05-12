@@ -36,10 +36,14 @@ public class SearchApiService {
         return parseResults(response);
     }
 
-    public List<Product> filterProducts(Integer categoryId, Double minPrice, Double maxPrice, String brand,
+    /**
+     * Unified filter/search method with optional keyword parameter.
+     */
+    public List<Product> filterProducts(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String brand,
                                         Integer sellerId, String startDate, String endDate,
                                         String sortBy, String sortOrder, int limit, int offset) {
         JSONObject payload = new JSONObject();
+        if (keyword != null && !keyword.isEmpty()) payload.put("keyword", keyword);
         if (categoryId != null) payload.put("categoryId", categoryId);
         if (minPrice != null) payload.put("minPrice", minPrice);
         if (maxPrice != null) payload.put("maxPrice", maxPrice);
@@ -52,7 +56,9 @@ public class SearchApiService {
         payload.put("limit", limit);
         payload.put("offset", offset);
 
-        String response = client.sendRequest("SEARCH", "FILTER_PRODUCTS", payload);
+        // Use keyword search if keyword is provided, otherwise filter
+        String action = (keyword != null && !keyword.isEmpty()) ? "SEARCH_BY_KEYWORD" : "FILTER_PRODUCTS";
+        String response = client.sendRequest("SEARCH", action, payload);
         return parseResults(response);
     }
 
@@ -75,6 +81,7 @@ public class SearchApiService {
                     p.setPrice(obj.optDouble("price", 0));
                     p.setStatus(obj.optString("status", ""));
                     p.setCreatedAt(obj.optString("createdAt", ""));
+                    p.setImageUrl(obj.optString("imageUrl", ""));
                     products.add(p);
                 }
             }

@@ -18,6 +18,11 @@ public class BrowseView {
     private String sortOrder = "DESC";
     private int currentPage = 0;
     private static final int PAGE_SIZE = 12;
+    private String searchQuery = null;
+    private String brandFilter = null;
+    private Double minPrice = null;
+    private Double maxPrice = null;
+    private Label pageLabel;
 
     public BrowseView(MainLayout layout) {
         this.layout = layout;
@@ -26,6 +31,90 @@ public class BrowseView {
 
         Label title = new Label("Browse Products");
         title.getStyleClass().add("heading");
+
+        // Search bar (merged from SearchView)
+        HBox searchRow = new HBox(12);
+        searchRow.setAlignment(Pos.CENTER_LEFT);
+        TextField searchField = new TextField();
+        searchField.setPromptText("\uD83D\uDD0D Search products by name...");
+        searchField.getStyleClass().add("search-field");
+        searchField.setPrefWidth(400);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+
+        Button searchBtn = new Button("Search");
+        searchBtn.setOnAction(e -> {
+            String query = searchField.getText().trim();
+            searchQuery = query.isEmpty() ? null : query;
+            currentPage = 0;
+            loadProducts();
+        });
+        searchField.setOnAction(e -> searchBtn.fire());
+
+        Button clearSearchBtn = new Button("Clear");
+        clearSearchBtn.getStyleClass().addAll("button", "button-secondary");
+        clearSearchBtn.setOnAction(e -> {
+            searchField.clear();
+            searchQuery = null;
+            currentPage = 0;
+            loadProducts();
+        });
+
+        searchRow.getChildren().addAll(searchField, searchBtn, clearSearchBtn);
+
+        // Filter panel (collapsible)
+        VBox filterPanel = new VBox(12);
+        filterPanel.getStyleClass().add("card");
+        filterPanel.setStyle("-fx-padding: 16;");
+
+        HBox filterRow = new HBox(16);
+        filterRow.setAlignment(Pos.CENTER_LEFT);
+
+        TextField brandField = new TextField();
+        brandField.setPromptText("Brand");
+        brandField.setPrefWidth(150);
+
+        TextField minPriceField = new TextField();
+        minPriceField.setPromptText("Min $");
+        minPriceField.setPrefWidth(80);
+
+        TextField maxPriceField = new TextField();
+        maxPriceField.setPromptText("Max $");
+        maxPriceField.setPrefWidth(80);
+
+        Button applyFilter = new Button("Apply Filters");
+        applyFilter.getStyleClass().addAll("button", "button-outline");
+        applyFilter.setStyle("-fx-padding: 8 16;");
+        applyFilter.setOnAction(e -> {
+            brandFilter = brandField.getText().trim().isEmpty() ? null : brandField.getText().trim();
+            try { minPrice = minPriceField.getText().trim().isEmpty() ? null : Double.parseDouble(minPriceField.getText().trim()); }
+            catch (NumberFormatException ex) { minPrice = null; }
+            try { maxPrice = maxPriceField.getText().trim().isEmpty() ? null : Double.parseDouble(maxPriceField.getText().trim()); }
+            catch (NumberFormatException ex) { maxPrice = null; }
+            currentPage = 0;
+            loadProducts();
+        });
+
+        Button resetFilter = new Button("Reset");
+        resetFilter.getStyleClass().addAll("button", "button-secondary");
+        resetFilter.setStyle("-fx-padding: 8 16;");
+        resetFilter.setOnAction(e -> {
+            brandField.clear();
+            minPriceField.clear();
+            maxPriceField.clear();
+            brandFilter = null;
+            minPrice = null;
+            maxPrice = null;
+            currentPage = 0;
+            loadProducts();
+        });
+
+        filterRow.getChildren().addAll(
+            new Label("Brand:"), brandField,
+            new Label("Price:"), minPriceField, new Label("-"), maxPriceField,
+            applyFilter, resetFilter
+        );
+
+        filterPanel.getChildren().add(filterRow);
 
         // Category chips
         HBox categories = new HBox(10);
@@ -41,7 +130,11 @@ public class BrowseView {
                 selectedCategory = catId;
                 currentPage = 0;
                 loadProducts();
-                // Rebuild categories to update active state
+                // Update active state
+                categories.getChildren().forEach(c -> {
+                    c.getStyleClass().remove("category-chip-active");
+                });
+                chip.getStyleClass().add("category-chip-active");
             });
             categories.getChildren().add(chip);
         }
@@ -70,18 +163,19 @@ public class BrowseView {
         productGrid = new FlowPane(16, 16);
 
         // Pagination
-        HBox pagination = new HBox(8);
+        HBox pagination = new HBox(12);
         pagination.setAlignment(Pos.CENTER);
         Button prevBtn = new Button("\u25C0 Previous");
         prevBtn.getStyleClass().addAll("button", "button-secondary");
         prevBtn.setOnAction(e -> { if (currentPage > 0) { currentPage--; loadProducts(); } });
-        Label pageLabel = new Label("Page " + (currentPage + 1));
+        pageLabel = new Label("Page " + (currentPage + 1));
+        pageLabel.setStyle("-fx-font-weight: bold;");
         Button nextBtn = new Button("Next \u25B6");
         nextBtn.getStyleClass().addAll("button", "button-secondary");
         nextBtn.setOnAction(e -> { currentPage++; loadProducts(); });
         pagination.getChildren().addAll(prevBtn, pageLabel, nextBtn);
 
-        content.getChildren().addAll(title, categories, sortRow, productGrid, pagination);
+        content.getChildren().addAll(title, searchRow, filterPanel, categories, sortRow, productGrid, pagination);
 
         root = new ScrollPane(content);
         root.setFitToWidth(true);
@@ -91,17 +185,18 @@ public class BrowseView {
     }
 
     private void loadProducts() {
+        pageLabel.setText("Page " + (currentPage + 1));
+
         new Thread(() -> {
-            List<Product> products;
-            if (selectedCategory > 0) {
-                products = searchApi.getProductsByCategory(selectedCategory, sortBy, sortOrder, PAGE_SIZE, currentPage * PAGE_SIZE);
-            } else {
-                products = searchApi.filterProducts(null, null, null, null, null, null, null, sortBy, sortOrder, PAGE_SIZE, currentPage * PAGE_SIZE);
-            }
+            Integer catId = selectedCategory > 0 ? selectedCategory : null;
+            List<Product> products = searchApi.filterProducts(
+                searchQuery, catId, minPrice, maxPrice, brandFilter,
+                null, null, null, sortBy, sortOrder, PAGE_SIZE, currentPage * PAGE_SIZE
+            );
             javafx.application.Platform.runLater(() -> {
                 productGrid.getChildren().clear();
                 if (products.isEmpty()) {
-                    Label empty = new Label("No products found in this category.");
+                    Label empty = new Label("No products found matching your criteria.");
                     empty.setStyle("-fx-text-fill: #64748B; -fx-font-size: 14px; -fx-padding: 40;");
                     productGrid.getChildren().add(empty);
                 } else {
@@ -121,9 +216,25 @@ public class BrowseView {
         StackPane imgPlaceholder = new StackPane();
         imgPlaceholder.getStyleClass().add("product-image-placeholder");
         imgPlaceholder.setPrefHeight(120);
-        Label imgIcon = new Label("\uD83D\uDCE6");
-        imgIcon.setStyle("-fx-font-size: 36px;");
-        imgPlaceholder.getChildren().add(imgIcon);
+
+        if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
+            try {
+                javafx.scene.image.Image img = new javafx.scene.image.Image(p.getImageUrl(), 220, 120, true, true, true);
+                javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+                imgView.setFitWidth(220);
+                imgView.setFitHeight(120);
+                imgView.setPreserveRatio(true);
+                imgPlaceholder.getChildren().add(imgView);
+            } catch (Exception e) {
+                Label imgIcon = new Label("\uD83D\uDCE6");
+                imgIcon.setStyle("-fx-font-size: 36px;");
+                imgPlaceholder.getChildren().add(imgIcon);
+            }
+        } else {
+            Label imgIcon = new Label("\uD83D\uDCE6");
+            imgIcon.setStyle("-fx-font-size: 36px;");
+            imgPlaceholder.getChildren().add(imgIcon);
+        }
 
         VBox info = new VBox(6);
         info.setPadding(new Insets(12));

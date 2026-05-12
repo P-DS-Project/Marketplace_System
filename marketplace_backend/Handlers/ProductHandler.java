@@ -28,12 +28,14 @@ public class ProductHandler implements ServiceHandler {
                 String name = json.optString("name", "");
                 double price = json.optDouble("price", -1.0);
                 String description = json.optString("description", "");
+                String brand = json.optString("brand", null);
+                String imageUrl = json.optString("imageUrl", null);
 
-                String result = productService.addProduct(sellerId, categoryId, name, price, description);
-                if (result.startsWith("ERROR")) {
-                    return "400 {\"error\":\"" + result + "\"}";
+                String result = productService.addProduct(sellerId, categoryId, name, price, description, brand, imageUrl);
+                if (result.startsWith("SUCCESS")) {
+                    return "201 " + result.substring(result.indexOf(" ") + 1);
                 }
-                return "201 {\"message\":\"" + result + "\"}";
+                return "400 {\"error\":\"" + result + "\"}";
             }
             case "GET_PRODUCTS_BY_SELLER": {
                 int sellerId = json.optInt("sellerId", -1);
@@ -71,15 +73,14 @@ public class ProductHandler implements ServiceHandler {
                 String name = json.optString("name", null);
                 double price = json.optDouble("price", -1.0);
                 String description = json.optString("description", null);
+                String brand = json.optString("brand", null);
+                String imageUrl = json.optString("imageUrl", null);
 
-                boolean success = productService.updateProduct(productId, name, price, description);
+                boolean success = productService.updateProduct(productId, name, price, description, brand, imageUrl);
                 if (success) {
                     return "200 {\"message\":\"Product updated successfully\"}";
                 }
                 return "400 {\"error\":\"Failed to update product\"}";
-            }
-            case "SEARCH": {
-                return "200 {\"products\":[]}";
             }
             default:
                 return "400 {\"error\":\"Unknown Product Action: " + action + "\"}";

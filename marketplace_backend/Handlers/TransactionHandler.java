@@ -20,7 +20,7 @@ public class TransactionHandler implements ServiceHandler {
         }
 
         switch (action.toUpperCase()) {
-            case "BUY":
+            case "BUY": {
                 int buyerId = json.optInt("buyerId", -1);
                 int productId = json.optInt("productId", -1);
                 int quantity = json.optInt("quantity", 1);
@@ -35,6 +35,21 @@ public class TransactionHandler implements ServiceHandler {
                 } else {
                     return "400 {\"error\":\"" + result + "\"}";
                 }
+            }
+            case "DEPOSIT": {
+                int userId = json.optInt("userId", -1);
+                double amount = json.optDouble("amount", 0);
+
+                if (userId == -1) return "400 {\"error\":\"Missing userId\"}";
+                if (amount <= 0) return "400 {\"error\":\"Invalid deposit amount\"}";
+
+                String result = transactionService.processDeposit(userId, amount);
+                if (result.startsWith("SUCCESS")) {
+                    return "200 " + result.substring(result.indexOf(" ") + 1);
+                } else {
+                    return "400 {\"error\":\"" + result + "\"}";
+                }
+            }
             default:
                 return "400 {\"error\":\"Unknown Transaction Action: " + action + "\"}";
         }

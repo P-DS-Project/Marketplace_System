@@ -82,4 +82,13 @@ public class ChatApiService {
         }
         return null;
     }
+
+    public boolean markAsRead(int userId, int fromUserId) {
+        JSONObject payload = new JSONObject();
+        payload.put("userId", userId);
+        payload.put("fromUserId", fromUserId);
+
+        String response = client.sendRequest("CHAT", "MARK_AS_READ", payload);
+        return SocketClient.getStatusCode(response) == 200;
+    }
 }

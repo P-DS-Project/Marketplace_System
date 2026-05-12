@@ -2,6 +2,7 @@ package Utils;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import Handlers.CartHandler;
 import Handlers.ChatHandler;
 import Handlers.ProductHandler;
 import Handlers.ServiceHandler;
@@ -25,6 +26,7 @@ public class RequestRouter {
         routingTable.put("INVENTORY", new InventoryHandler());
         routingTable.put("SEARCH", new SearchHandler());
         routingTable.put("REPORT", new ReportHandler());
+        routingTable.put("CART", new CartHandler());
     }
 
     public String route(String serviceDomain, String action, String jsonPayload) {

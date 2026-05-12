@@ -7,7 +7,7 @@ import models.Product;
 import models.Inventory;
 import services.ProductApiService;
 import services.InventoryApiService;
-import services.TransactionApiService;
+import services.CartApiService;
 import state.SessionManager;
 import utils.AlertHelper;
 import org.json.JSONObject;
@@ -23,12 +23,10 @@ public class ProductDetailView {
         ProductApiService productApi = new ProductApiService();
         InventoryApiService inventoryApi = new InventoryApiService();
 
-        // Back button
         Button backBtn = new Button("\u25C0 Back to Browse");
         backBtn.getStyleClass().addAll("button", "button-secondary");
         backBtn.setOnAction(e -> layout.navigateTo("browse"));
 
-        // Loading state
         Label loading = new Label("Loading product details...");
         content.getChildren().addAll(backBtn, loading);
 
@@ -47,14 +45,30 @@ public class ProductDetailView {
 
                 HBox mainRow = new HBox(32);
 
-                // Left: Image placeholder
+                // Left: Image
                 StackPane imgPlaceholder = new StackPane();
                 imgPlaceholder.getStyleClass().add("product-image-placeholder");
                 imgPlaceholder.setPrefSize(400, 300);
                 imgPlaceholder.setMinSize(400, 300);
-                Label imgIcon = new Label("\uD83D\uDCE6");
-                imgIcon.setStyle("-fx-font-size: 64px;");
-                imgPlaceholder.getChildren().add(imgIcon);
+
+                if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+                    try {
+                        javafx.scene.image.Image img = new javafx.scene.image.Image(product.getImageUrl(), 400, 300, true, true, true);
+                        javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
+                        imgView.setFitWidth(400);
+                        imgView.setFitHeight(300);
+                        imgView.setPreserveRatio(true);
+                        imgPlaceholder.getChildren().add(imgView);
+                    } catch (Exception e) {
+                        Label imgIcon = new Label("\uD83D\uDCE6");
+                        imgIcon.setStyle("-fx-font-size: 64px;");
+                        imgPlaceholder.getChildren().add(imgIcon);
+                    }
+                } else {
+                    Label imgIcon = new Label("\uD83D\uDCE6");
+                    imgIcon.setStyle("-fx-font-size: 64px;");
+                    imgPlaceholder.getChildren().add(imgIcon);
+                }
                 imgPlaceholder.setStyle("-fx-background-radius: 12;");
 
                 // Right: Details
@@ -80,7 +94,6 @@ public class ProductDetailView {
                 descLabel.setWrapText(true);
                 descLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 4;");
 
-                // Product info card
                 VBox infoCard = new VBox(8);
                 infoCard.getStyleClass().add("card");
                 infoCard.getChildren().addAll(
@@ -96,30 +109,22 @@ public class ProductDetailView {
                 int currentUserId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
 
                 if ("AVAILABLE".equals(product.getStatus()) && product.getSellerId() != currentUserId) {
-                    // Buy button
-                    Button buyBtn = new Button("\uD83D\uDED2 Buy Now");
-                    buyBtn.getStyleClass().addAll("button", "button-success");
-                    buyBtn.setOnAction(e -> {
-                        TextInputDialog dialog = new TextInputDialog("1");
-                        dialog.setTitle("Purchase Product");
-                        dialog.setHeaderText("Buy: " + product.getName());
-                        dialog.setContentText("Quantity:");
-                        dialog.showAndWait().ifPresent(qty -> {
-                            try {
-                                int q = Integer.parseInt(qty);
-                                TransactionApiService txApi = new TransactionApiService();
-                                JSONObject result = txApi.buy(currentUserId, product.getProductId(), q);
-                                if (result.optBoolean("success")) {
-                                    AlertHelper.showSuccess("Purchase successful! Paid: $" + result.optDouble("totalPaid", 0));
-                                } else {
-                                    AlertHelper.showError("Purchase Failed", result.optString("error", "Unknown error"));
-                                }
-                            } catch (NumberFormatException ex) {
-                                AlertHelper.showError("Invalid Input", "Please enter a valid number.");
-                            }
-                        });
+                    // Add to Cart button
+                    Button addCartBtn = new Button("\uD83D\uDED2 Add to Cart");
+                    addCartBtn.getStyleClass().addAll("button", "button-success");
+                    addCartBtn.setStyle("-fx-font-size: 14px; -fx-padding: 12 24;");
+                    addCartBtn.setOnAction(e -> {
+                        CartApiService cartApi = new CartApiService();
+                        JSONObject result = cartApi.addToCart(currentUserId, product.getProductId(), 1);
+                        if (result.optBoolean("success")) {
+                            int cartCount = result.optInt("cartCount", 0);
+                            SessionManager.getInstance().setCartItemCount(cartCount);
+                            AlertHelper.showSuccess("Added to cart! (" + cartCount + " items)");
+                        } else {
+                            AlertHelper.showError("Error", result.optString("error", "Failed to add to cart"));
+                        }
                     });
-                    actions.getChildren().add(buyBtn);
+                    actions.getChildren().add(addCartBtn);
                 }
 
                 // Message seller button

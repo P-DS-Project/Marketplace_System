@@ -12,7 +12,8 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL,
     password_hash VARCHAR(256) NOT NULL,
     salt VARCHAR(64) NOT NULL,
-    role VARCHAR(20) CHECK (role IN ('BUYER', 'SELLER', 'ADMIN', 'EXTERNAL_STORE')),
+    role VARCHAR(20) CHECK (role IN ('USER', 'EXTERNAL_STORE', 'ADMIN')),
+    avatar_url VARCHAR(500),
     is_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -43,6 +44,18 @@ CREATE TABLE chat_messages (
     CONSTRAINT fk_receiver FOREIGN KEY (receiver_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE cart_items (
+    cart_item_id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL,
+    product_id INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_cart_user FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    CONSTRAINT uq_cart_user_product UNIQUE (user_id, product_id)
+);
+
+CREATE INDEX idx_cart_user ON cart_items(user_id);
+
 
 CREATE DATABASE marketplace_node2;
 \c marketplace_node2;
@@ -61,6 +74,7 @@ CREATE TABLE products (
     brand VARCHAR(100),
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
+    image_url VARCHAR(500),
     status VARCHAR(20) CHECK (status IN ('AVAILABLE', 'SOLD', 'REMOVED')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

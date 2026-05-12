@@ -109,8 +109,10 @@ public class ReportService {
             int activeProducts = 0;
             int soldProducts = 0;
             for (ProductEntity p : products) {
-                if ("AVAILABLE".equals(p.getStatus())) activeProducts++;
-                if ("SOLD".equals(p.getStatus())) soldProducts++;
+                if ("AVAILABLE".equals(p.getStatus()))
+                    activeProducts++;
+                if ("SOLD".equals(p.getStatus()))
+                    soldProducts++;
             }
 
             JSONObject report = new JSONObject();
@@ -134,8 +136,7 @@ public class ReportService {
             JSONArray inventoryArray = new JSONArray();
             // Query all available products and their inventory
             List<ProductEntity> products = productDao.advancedSearch(
-                null, null, null, null, null, null, null, null, "name", "ASC", 1000, 0
-            );
+                    null, null, null, null, null, null, null, null, "name", "ASC", 1000, 0);
 
             int totalProducts = products.size();
             int inStockCount = 0;
@@ -152,8 +153,10 @@ public class ReportService {
                 if (inv != null) {
                     item.put("quantity", inv.getQuantity());
                     item.put("warehouseNode", inv.getWarehouse_node());
-                    if (inv.getQuantity() > 0) inStockCount++;
-                    else outOfStockCount++;
+                    if (inv.getQuantity() > 0)
+                        inStockCount++;
+                    else
+                        outOfStockCount++;
                 } else {
                     item.put("quantity", 0);
                     item.put("warehouseNode", "N/A");
@@ -178,15 +181,16 @@ public class ReportService {
         try {
             // Get all products
             List<ProductEntity> products = productDao.advancedSearch(
-                null, null, null, null, null, null, null, null, "created_at", "DESC", 10000, 0
-            );
+                    null, null, null, null, null, null, null, null, "created_at", "DESC", 10000, 0);
 
             int totalProducts = products.size();
             int availableProducts = 0;
             int soldProducts = 0;
             for (ProductEntity p : products) {
-                if ("AVAILABLE".equals(p.getStatus())) availableProducts++;
-                if ("SOLD".equals(p.getStatus())) soldProducts++;
+                if ("AVAILABLE".equals(p.getStatus()))
+                    availableProducts++;
+                if ("SOLD".equals(p.getStatus()))
+                    soldProducts++;
             }
 
             JSONObject report = new JSONObject();

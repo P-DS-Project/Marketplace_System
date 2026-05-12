@@ -5,6 +5,7 @@ public class User {
     private String username;
     private String email;
     private String role;
+    private String avatarUrl;
 
     public User() {}
 
@@ -27,11 +28,18 @@ public class User {
     public String getRole() { return role; }
     public void setRole(String role) { this.role = role; }
 
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
     public boolean isSeller() {
-        return "seller".equalsIgnoreCase(role);
+        return "seller".equalsIgnoreCase(role) || "EXTERNAL_STORE".equalsIgnoreCase(role);
     }
 
     public boolean isBuyer() {
-        return "buyer".equalsIgnoreCase(role);
+        return "buyer".equalsIgnoreCase(role) || "USER".equalsIgnoreCase(role);
+    }
+
+    public boolean isAdmin() {
+        return "ADMIN".equalsIgnoreCase(role);
     }
 }

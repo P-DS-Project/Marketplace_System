@@ -12,12 +12,18 @@ public class ProductApiService {
     private final SocketClient client = SocketClient.getInstance();
 
     public String addProduct(int sellerId, int categoryId, String name, double price, String description) {
+        return addProduct(sellerId, categoryId, name, price, description, null, null);
+    }
+
+    public String addProduct(int sellerId, int categoryId, String name, double price, String description, String brand, String imageUrl) {
         JSONObject payload = new JSONObject();
         payload.put("sellerId", sellerId);
         payload.put("categoryId", categoryId);
         payload.put("name", name);
         payload.put("price", price);
         payload.put("description", description);
+        if (brand != null && !brand.isEmpty()) payload.put("brand", brand);
+        if (imageUrl != null && !imageUrl.isEmpty()) payload.put("imageUrl", imageUrl);
 
         String response = client.sendRequest("PRODUCT", "ADD", payload);
         int code = SocketClient.getStatusCode(response);
@@ -60,11 +66,17 @@ public class ProductApiService {
     }
 
     public String updateProduct(int productId, String name, double price, String description) {
+        return updateProduct(productId, name, price, description, null, null);
+    }
+
+    public String updateProduct(int productId, String name, double price, String description, String brand, String imageUrl) {
         JSONObject payload = new JSONObject();
         payload.put("productId", productId);
         payload.put("name", name);
         payload.put("price", price);
         payload.put("description", description);
+        if (brand != null) payload.put("brand", brand);
+        if (imageUrl != null) payload.put("imageUrl", imageUrl);
 
         String response = client.sendRequest("PRODUCT", "UPDATE_PRODUCT", payload);
         int code = SocketClient.getStatusCode(response);
@@ -116,6 +128,7 @@ public class ProductApiService {
         p.setPrice(json.optDouble("price", 0));
         p.setStatus(json.optString("status", ""));
         p.setCreatedAt(json.optString("createdAt", ""));
+        p.setImageUrl(json.optString("imageUrl", ""));
         return p;
     }
 }

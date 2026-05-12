@@ -7,6 +7,8 @@ import models.ChatMessage;
 import services.ChatApiService;
 import state.SessionManager;
 import utils.AlertHelper;
+import org.json.JSONObject;
+import org.json.JSONArray;
 import java.util.List;
 
 public class ChatView {
@@ -16,6 +18,8 @@ public class ChatView {
     private VBox messageArea;
     private TextField messageInput;
     private int selectedUserId = -1;
+    private Label headerTitle;
+    private VBox chatListContent;
 
     public ChatView() {
         root = new HBox(0);
@@ -23,8 +27,8 @@ public class ChatView {
 
         // Left panel - conversation list
         VBox leftPanel = new VBox(0);
-        leftPanel.setPrefWidth(280);
-        leftPanel.setMinWidth(280);
+        leftPanel.setPrefWidth(300);
+        leftPanel.setMinWidth(300);
         leftPanel.setStyle("-fx-border-color: #E2E8F0; -fx-border-width: 0 1 0 0;");
 
         Label chatTitle = new Label("\uD83D\uDCAC Messages");
@@ -33,11 +37,11 @@ public class ChatView {
 
         // Start new chat section
         HBox newChatBox = new HBox(8);
-        newChatBox.setPadding(new Insets(0, 16, 16, 16));
+        newChatBox.setPadding(new Insets(0, 16, 12, 16));
         TextField userIdField = new TextField();
         userIdField.setPromptText("User ID");
-        userIdField.setPrefWidth(120);
-        Button startChatBtn = new Button("Start Chat");
+        userIdField.setPrefWidth(100);
+        Button startChatBtn = new Button("New Chat");
         startChatBtn.getStyleClass().addAll("button");
         startChatBtn.setStyle("-fx-padding: 8 12; -fx-font-size: 12px;");
         startChatBtn.setOnAction(e -> {
@@ -45,45 +49,30 @@ public class ChatView {
                 int userId = Integer.parseInt(userIdField.getText().trim());
                 selectedUserId = userId;
                 loadConversation(userId);
+                loadChatList();
             } catch (NumberFormatException ex) {
                 AlertHelper.showError("Invalid Input", "Enter a valid user ID.");
             }
         });
         newChatBox.getChildren().addAll(userIdField, startChatBtn);
 
+        // Search conversations
+        TextField searchField = new TextField();
+        searchField.setPromptText("\uD83D\uDD0D Search conversations...");
+        searchField.setPadding(new Insets(8));
+        HBox searchBox = new HBox();
+        searchBox.setPadding(new Insets(0, 16, 12, 16));
+        searchBox.getChildren().add(searchField);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+
         ScrollPane chatListScroll = new ScrollPane();
         chatListScroll.setFitToWidth(true);
         chatListScroll.setStyle("-fx-background-color: transparent;");
-        VBox chatListContent = new VBox(0);
-
-        // Sample chat entries
-        for (int i = 1; i <= 5; i++) {
-            final int uid = i;
-            HBox chatItem = new HBox(10);
-            chatItem.getStyleClass().add("chat-list-item");
-            chatItem.setPadding(new Insets(12, 16, 12, 16));
-            chatItem.setAlignment(Pos.CENTER_LEFT);
-
-            Label avatar = new Label("\uD83D\uDC64");
-            avatar.setStyle("-fx-font-size: 24px;");
-            VBox chatInfo = new VBox(2);
-            Label userName = new Label("User #" + i);
-            userName.setStyle("-fx-font-weight: bold;");
-            Label lastMsg = new Label("Click to load conversation");
-            lastMsg.setStyle("-fx-text-fill: #64748B; -fx-font-size: 12px;");
-            chatInfo.getChildren().addAll(userName, lastMsg);
-
-            chatItem.getChildren().addAll(avatar, chatInfo);
-            chatItem.setOnMouseClicked(e -> {
-                selectedUserId = uid;
-                loadConversation(uid);
-            });
-            chatListContent.getChildren().add(chatItem);
-        }
-
+        chatListContent = new VBox(0);
         chatListScroll.setContent(chatListContent);
         VBox.setVgrow(chatListScroll, Priority.ALWAYS);
-        leftPanel.getChildren().addAll(chatTitle, newChatBox, chatListScroll);
+
+        leftPanel.getChildren().addAll(chatTitle, newChatBox, searchBox, chatListScroll);
 
         // Right panel - message thread
         VBox rightPanel = new VBox(0);
@@ -94,7 +83,7 @@ public class ChatView {
         chatHeader.setPadding(new Insets(16));
         chatHeader.setAlignment(Pos.CENTER_LEFT);
         chatHeader.setStyle("-fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0;");
-        Label headerTitle = new Label("Select a conversation");
+        headerTitle = new Label("Select a conversation");
         headerTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
         chatHeader.getChildren().add(headerTitle);
 
@@ -129,6 +118,117 @@ public class ChatView {
 
         rightPanel.getChildren().addAll(chatHeader, msgScroll, inputBar);
         root.getChildren().addAll(leftPanel, rightPanel);
+
+        // Load real chat list
+        loadChatList();
+
+        // Filter conversations by search
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> {
+            filterChatList(newVal);
+        });
+    }
+
+    private void loadChatList() {
+        int myId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
+        if (myId == -1) return;
+
+        new Thread(() -> {
+            JSONObject result = chatApi.listUserChats(myId);
+            javafx.application.Platform.runLater(() -> {
+                chatListContent.getChildren().clear();
+
+                if (result == null || !result.has("chats")) {
+                    Label empty = new Label("No conversations yet");
+                    empty.setStyle("-fx-text-fill: #64748B; -fx-padding: 20 16;");
+                    chatListContent.getChildren().add(empty);
+                    return;
+                }
+
+                JSONArray chats = result.getJSONArray("chats");
+                for (int i = 0; i < chats.length(); i++) {
+                    JSONObject chat = chats.getJSONObject(i);
+                    int partnerId = chat.optInt("partnerId");
+                    String partnerName = chat.optString("partnerName", "User #" + partnerId);
+                    String lastMessage = chat.optString("lastMessage", "");
+                    int unreadCount = chat.optInt("unreadCount", 0);
+
+                    chatListContent.getChildren().add(
+                        createChatListItem(partnerId, partnerName, lastMessage, unreadCount)
+                    );
+                }
+            });
+        }).start();
+    }
+
+    private void filterChatList(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            for (javafx.scene.Node child : chatListContent.getChildren()) {
+                child.setVisible(true);
+                child.setManaged(true);
+            }
+            return;
+        }
+        String lowerQuery = query.toLowerCase();
+        for (javafx.scene.Node child : chatListContent.getChildren()) {
+            if (child instanceof HBox) {
+                HBox item = (HBox) child;
+                String userData = item.getUserData() != null ? item.getUserData().toString().toLowerCase() : "";
+                boolean match = userData.contains(lowerQuery);
+                item.setVisible(match);
+                item.setManaged(match);
+            }
+        }
+    }
+
+    private HBox createChatListItem(int partnerId, String partnerName, String lastMsg, int unreadCount) {
+        HBox chatItem = new HBox(10);
+        chatItem.getStyleClass().add("chat-list-item");
+        chatItem.setPadding(new Insets(12, 16, 12, 16));
+        chatItem.setAlignment(Pos.CENTER_LEFT);
+        chatItem.setUserData(partnerName);
+
+        Label avatar = new Label("\uD83D\uDC64");
+        avatar.setStyle("-fx-font-size: 28px;");
+
+        VBox chatInfo = new VBox(2);
+        HBox.setHgrow(chatInfo, Priority.ALWAYS);
+
+        HBox nameRow = new HBox(8);
+        nameRow.setAlignment(Pos.CENTER_LEFT);
+        Label userName = new Label(partnerName);
+        userName.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
+
+        if (unreadCount > 0) {
+            Label unreadBadge = new Label(String.valueOf(unreadCount));
+            unreadBadge.setStyle("-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-background-radius: 10; " +
+                "-fx-padding: 2 8; -fx-font-size: 11px; -fx-font-weight: bold;");
+            nameRow.getChildren().addAll(userName, unreadBadge);
+        } else {
+            nameRow.getChildren().add(userName);
+        }
+
+        Label lastMsgLabel = new Label(lastMsg.length() > 40 ? lastMsg.substring(0, 37) + "..." : lastMsg);
+        lastMsgLabel.setStyle("-fx-text-fill: #64748B; -fx-font-size: 12px;");
+
+        chatInfo.getChildren().addAll(nameRow, lastMsgLabel);
+        chatItem.getChildren().addAll(avatar, chatInfo);
+
+        chatItem.setOnMouseClicked(e -> {
+            selectedUserId = partnerId;
+            headerTitle.setText(partnerName);
+            loadConversation(partnerId);
+
+            // Mark as read
+            int myId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
+            if (myId != -1) {
+                new Thread(() -> {
+                    chatApi.markAsRead(myId, partnerId);
+                    javafx.application.Platform.runLater(this::loadChatList);
+                }).start();
+            }
+        });
+
+        return chatItem;
     }
 
     private void loadConversation(int otherUserId) {
@@ -144,15 +244,24 @@ public class ChatView {
                 } else {
                     for (ChatMessage msg : messages) {
                         boolean isMine = msg.getSenderId() == myId;
-                        HBox bubble = new HBox();
+                        VBox bubble = new VBox(2);
+
                         Label msgLabel = new Label(msg.getContent());
                         msgLabel.setWrapText(true);
                         msgLabel.setMaxWidth(400);
                         msgLabel.getStyleClass().add(isMine ? "chat-bubble-sent" : "chat-bubble-received");
-                        msgLabel.setStyle(msgLabel.getStyle() + (isMine ? "-fx-text-fill: white;" : ""));
+                        if (isMine) msgLabel.setStyle(msgLabel.getStyle() + "-fx-text-fill: white;");
+
+                        Label timeLabel = new Label(msg.getTimestamp() != null ? msg.getTimestamp() : "");
+                        timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #94A3B8;");
+
+                        bubble.getChildren().addAll(msgLabel, timeLabel);
                         bubble.setAlignment(isMine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
-                        bubble.getChildren().add(msgLabel);
-                        messageArea.getChildren().add(bubble);
+
+                        HBox row = new HBox();
+                        row.setAlignment(isMine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+                        row.getChildren().add(bubble);
+                        messageArea.getChildren().add(row);
                     }
                 }
             });
@@ -171,6 +280,7 @@ public class ChatView {
                 if (!result.startsWith("ERROR")) {
                     messageInput.clear();
                     loadConversation(selectedUserId);
+                    loadChatList();
                 } else {
                     AlertHelper.showError("Error", result);
                 }
