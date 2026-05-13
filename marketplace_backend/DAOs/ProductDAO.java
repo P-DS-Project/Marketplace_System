@@ -236,4 +236,18 @@ public class ProductDAO {
         }
         return p;
     }
+
+    // ==================== ADMIN METHODS ====================
+
+    public int countProducts() {
+        String sql = "SELECT COUNT(*) FROM products";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

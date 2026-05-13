@@ -11,6 +11,7 @@ import Handlers.TransactionHandler;
 import Handlers.InventoryHandler;
 import Handlers.SearchHandler;
 import Handlers.ReportHandler;
+import Handlers.AdminHandler;
 
 public class RequestRouter {
 
@@ -27,6 +28,7 @@ public class RequestRouter {
         routingTable.put("SEARCH", new SearchHandler());
         routingTable.put("REPORT", new ReportHandler());
         routingTable.put("CART", new CartHandler());
+        routingTable.put("ADMIN", new AdminHandler());
     }
 
     public String route(String serviceDomain, String action, String jsonPayload) {

@@ -9,7 +9,9 @@ public class UserEntity {
     private String salt;
     private String role;
     private boolean isVerified;
+    private boolean isActive;
     private String avatarUrl;
+    private String createdAt;
 
     public UserEntity() {}
 
@@ -34,6 +36,12 @@ public class UserEntity {
     public boolean isVerified() { return isVerified; }
     public void setVerified(boolean verified) { isVerified = verified; }
 
+    public boolean isActive() { return isActive; }
+    public void setActive(boolean active) { isActive = active; }
+
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
+
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 }

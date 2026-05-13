@@ -64,11 +64,15 @@ public class UserService {
             return "ERROR: Invalid credentials.";
         }
 
+        if (!user.isActive()) {
+            return "ERROR: Account is disabled. Contact an administrator.";
+        }
+
         String expectedHash = authService.hashPassword(plainPassword, user.getSalt());
 
         if (expectedHash.equals(user.getPasswordHash())) {
             String jwt = authService.generateJWT(user.getUserId(), user.getRole());
-            return "SUCCESS: " + jwt;
+            return "SUCCESS:" + user.getRole() + " " + jwt;
         } else {
             return "ERROR: Invalid credentials.";
         }

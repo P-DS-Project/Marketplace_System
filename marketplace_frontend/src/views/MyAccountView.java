@@ -47,7 +47,8 @@ public class MyAccountView {
         StackPane avatarHolder = new StackPane();
         avatarHolder.setPrefSize(80, 80);
         avatarHolder.setMaxSize(80, 80);
-        avatarHolder.setStyle("-fx-background-color: linear-gradient(to bottom right, #DBEAFE, #E0E7FF); -fx-background-radius: 40;");
+        avatarHolder.setStyle(
+                "-fx-background-color: linear-gradient(to bottom right, #DBEAFE, #E0E7FF); -fx-background-radius: 40;");
         Label avatarIcon = new Label("\uD83D\uDC64");
         avatarIcon.setStyle("-fx-font-size: 36px;");
         avatarHolder.getChildren().add(avatarIcon);
@@ -70,7 +71,7 @@ public class MyAccountView {
         Label balanceTitle = new Label("Account Balance");
         balanceTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        String balanceStr = account != null ? String.format("$%.2f %s", account.getBalance(), account.getCurrency()) : "$0.00";
+        String balanceStr = account != null ? String.format("$%.2f ", account.getBalance()) : "$0.00";
         Label balanceAmount = new Label(balanceStr);
         balanceAmount.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #10B981;");
 
@@ -88,13 +89,17 @@ public class MyAccountView {
         depositBtn.setOnAction(e -> {
             try {
                 double amount = Double.parseDouble(depositField.getText().trim());
-                if (amount <= 0) { AlertHelper.showError("Error", "Amount must be positive."); return; }
+                if (amount <= 0) {
+                    AlertHelper.showError("Error", "Amount must be positive.");
+                    return;
+                }
                 int userId = SessionManager.getInstance().getCurrentUser().getUserId();
                 JSONObject result = userApi.deposit(userId, amount);
                 if (result.optBoolean("success")) {
                     double newBal = result.optDouble("newBalance", 0);
                     SessionManager.getInstance().getAccount().setBalance(newBal);
-                    balanceAmount.setText(String.format("$%.2f %s", newBal, account != null ? account.getCurrency() : "EGP"));
+                    balanceAmount.setText(
+                            String.format("$%.2f %s", newBal, account != null ? account.getCurrency() : "EGP"));
                     depositField.clear();
                     AlertHelper.showSuccess("Deposited $" + String.format("%.2f", amount));
                 } else {
@@ -148,7 +153,8 @@ public class MyAccountView {
             }
         });
 
-        actionsCard.getChildren().addAll(actionsTitle, editProfileBtn, changePassBtn, logoutBtn, new Separator(), deleteBtn);
+        actionsCard.getChildren().addAll(actionsTitle, editProfileBtn, changePassBtn, logoutBtn, new Separator(),
+                deleteBtn);
 
         leftCol.getChildren().addAll(profileCard, balanceCard, actionsCard);
 
@@ -195,14 +201,22 @@ public class MyAccountView {
                     String sort = sortCombo.getValue();
                     java.util.Comparator<Transaction> comp;
                     switch (sort) {
-                        case "Oldest First": comp = java.util.Comparator.comparing(Transaction::getCreatedAt); break;
-                        case "Amount: High to Low": comp = java.util.Comparator.comparingDouble(Transaction::getAmount).reversed(); break;
-                        case "Amount: Low to High": comp = java.util.Comparator.comparingDouble(Transaction::getAmount); break;
-                        default: comp = (a, b) -> {
-                            String ca = a.getCreatedAt() != null ? a.getCreatedAt() : "";
-                            String cb = b.getCreatedAt() != null ? b.getCreatedAt() : "";
-                            return cb.compareTo(ca);
-                        }; break;
+                        case "Oldest First":
+                            comp = java.util.Comparator.comparing(Transaction::getCreatedAt);
+                            break;
+                        case "Amount: High to Low":
+                            comp = java.util.Comparator.comparingDouble(Transaction::getAmount).reversed();
+                            break;
+                        case "Amount: Low to High":
+                            comp = java.util.Comparator.comparingDouble(Transaction::getAmount);
+                            break;
+                        default:
+                            comp = (a, b) -> {
+                                String ca = a.getCreatedAt() != null ? a.getCreatedAt() : "";
+                                String cb = b.getCreatedAt() != null ? b.getCreatedAt() : "";
+                                return cb.compareTo(ca);
+                            };
+                            break;
                     }
 
                     List<Transaction> filtered = stream.sorted(comp).collect(java.util.stream.Collectors.toList());
@@ -241,7 +255,7 @@ public class MyAccountView {
 
                             Label statusBadge = new Label(tx.getStatus());
                             statusBadge.getStyleClass().addAll("badge",
-                                "COMPLETED".equals(tx.getStatus()) ? "badge-completed" : "badge-pending");
+                                    "COMPLETED".equals(tx.getStatus()) ? "badge-completed" : "badge-pending");
 
                             row.getChildren().addAll(icon, txInfo, amount, statusBadge);
                             txList.getChildren().add(row);
@@ -290,7 +304,7 @@ public class MyAccountView {
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
                 String result = userApi.updateProfile(SessionManager.getInstance().getToken(),
-                    nameField.getText().trim(), emailField.getText().trim(), null);
+                        nameField.getText().trim(), emailField.getText().trim(), null);
                 if (!result.startsWith("ERROR")) {
                     if (user != null) {
                         user.setUsername(nameField.getText().trim());
@@ -343,7 +357,7 @@ public class MyAccountView {
                     return null;
                 }
                 String result = userApi.changePassword(SessionManager.getInstance().getToken(),
-                    oldPass.getText(), newPass.getText());
+                        oldPass.getText(), newPass.getText());
                 if (!result.startsWith("ERROR")) {
                     AlertHelper.showSuccess("Password changed successfully!");
                 } else {
@@ -355,5 +369,7 @@ public class MyAccountView {
         dialog.showAndWait();
     }
 
-    public ScrollPane getRoot() { return root; }
+    public ScrollPane getRoot() {
+        return root;
+    }
 }

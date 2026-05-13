@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 import Entities.UserEntity;
 import Utils.DatabaseConnectionManager;
@@ -15,17 +17,17 @@ public class UserDAO {
     }
 
     public UserEntity findByUsername(String username) {
-        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, avatar_url FROM users WHERE username = ?";
+        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, is_active, avatar_url, created_at FROM users WHERE username = ?";
         return findUserBySql(sql, username);
     }
 
     public UserEntity findByEmail(String email) {
-        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, avatar_url FROM users WHERE email = ?";
+        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, is_active, avatar_url, created_at FROM users WHERE email = ?";
         return findUserBySql(sql, email);
     }
 
     public UserEntity findById(int userId) {
-        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, avatar_url FROM users WHERE user_id = ?";
+        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, is_active, avatar_url, created_at FROM users WHERE user_id = ?";
         try (Connection conn = getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);
@@ -66,7 +68,14 @@ public class UserDAO {
         user.setSalt(rs.getString("salt"));
         user.setRole(rs.getString("role"));
         user.setVerified(rs.getBoolean("is_verified"));
+        user.setActive(rs.getBoolean("is_active"));
         user.setAvatarUrl(rs.getString("avatar_url"));
+        try {
+            java.sql.Timestamp ts = rs.getTimestamp("created_at");
+            user.setCreatedAt(ts != null ? ts.toString() : "");
+        } catch (SQLException ignored) {
+            user.setCreatedAt("");
+        }
         return user;
     }
 
@@ -152,10 +161,15 @@ public class UserDAO {
 
     public boolean deleteUser(int userId) {
         String deleteEmails = "DELETE FROM unique_emails WHERE user_id = ?";
+        String deleteCartItems = "DELETE FROM cart_items WHERE user_id = ?";
         String deleteUser = "DELETE FROM users WHERE user_id = ?";
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false);
             try {
+                try (PreparedStatement ps0 = conn.prepareStatement(deleteCartItems)) {
+                    ps0.setInt(1, userId);
+                    ps0.executeUpdate();
+                }
                 try (PreparedStatement ps1 = conn.prepareStatement(deleteEmails)) {
                     ps1.setInt(1, userId);
                     ps1.executeUpdate();
@@ -189,5 +203,92 @@ public class UserDAO {
             e.printStackTrace();
         }
         return "User #" + userId;
+    }
+
+    // ==================== ADMIN METHODS ====================
+
+    public List<UserEntity> getAllUsers() {
+        List<UserEntity> users = new ArrayList<>();
+        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, is_active, avatar_url, created_at FROM users ORDER BY user_id";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                users.add(mapRowToUser(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public List<UserEntity> searchUsers(String query) {
+        List<UserEntity> users = new ArrayList<>();
+        String sql = "SELECT user_id, username, email, password_hash, salt, role, is_verified, is_active, avatar_url, created_at FROM users WHERE username ILIKE ? OR email ILIKE ? OR CAST(user_id AS TEXT) = ? ORDER BY user_id";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            String likeParam = "%" + query + "%";
+            pstmt.setString(1, likeParam);
+            pstmt.setString(2, likeParam);
+            pstmt.setString(3, query.trim());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapRowToUser(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
+    }
+
+    public boolean updateRole(int userId, String newRole) {
+        String sql = "UPDATE users SET role = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, newRole);
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean setActive(int userId, boolean active) {
+        String sql = "UPDATE users SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setBoolean(1, active);
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public int countUsers() {
+        String sql = "SELECT COUNT(*) FROM users";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public int countAdmins() {
+        String sql = "SELECT COUNT(*) FROM users WHERE role = 'ADMIN'";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

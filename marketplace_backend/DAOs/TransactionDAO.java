@@ -61,4 +61,56 @@ public class TransactionDAO {
             return false; 
         }
     }
+
+    // ==================== ADMIN METHODS ====================
+
+    public List<TransactionEntity> getAllTransactions() {
+        List<TransactionEntity> transactions = new ArrayList<>();
+        String sql = "SELECT transaction_id, buyer_id, seller_id, product_id, quantity, amount, status, type, created_at, completed_at FROM transactions ORDER BY created_at DESC";
+        try (Connection conn = getConnection();
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                ResultSet rs = pstmt.executeQuery()) {
+            while (rs.next()) {
+                TransactionEntity t = new TransactionEntity();
+                t.setTransactionId(rs.getInt("transaction_id"));
+                t.setBuyerId(rs.getInt("buyer_id"));
+                t.setSellerId(rs.getInt("seller_id"));
+                t.setProductId(rs.getInt("product_id"));
+                t.setQuantity(rs.getInt("quantity"));
+                t.setAmount(rs.getDouble("amount"));
+                t.setStatus(rs.getString("status"));
+                t.setType(rs.getString("type"));
+                t.setCreated_at(rs.getString("created_at"));
+                t.setCompleted_at(rs.getString("completed_at"));
+                transactions.add(t);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return transactions;
+    }
+
+    public int countTransactions() {
+        String sql = "SELECT COUNT(*) FROM transactions";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public double sumCompletedAmount() {
+        String sql = "SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE status = 'COMPLETED' AND type = 'PURCHASE'";
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql);
+             ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) return rs.getDouble(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
 }

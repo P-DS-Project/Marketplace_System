@@ -41,9 +41,13 @@ public class UserHandler implements ServiceHandler {
                 String loginPassword = json.optString("password", null);
 
                 String loginResult = userService.login(loginEmail, loginPassword);
-                if (loginResult.startsWith("SUCCESS")) {
-                    String token = loginResult.substring(loginResult.indexOf(" ") + 1);
-                    return "200 {\"token\":\"" + token + "\"}";
+                if (loginResult.startsWith("SUCCESS:")) {
+                    // Format: "SUCCESS:<ROLE> <token>"
+                    String afterSuccess = loginResult.substring(8); // "<ROLE> <token>"
+                    int spaceIdx = afterSuccess.indexOf(" ");
+                    String role = afterSuccess.substring(0, spaceIdx);
+                    String token = afterSuccess.substring(spaceIdx + 1);
+                    return "200 {\"token\":\"" + token + "\",\"role\":\"" + role + "\"}";
                 } else {
                     return "401 {\"error\":\"" + loginResult + "\"}";
                 }

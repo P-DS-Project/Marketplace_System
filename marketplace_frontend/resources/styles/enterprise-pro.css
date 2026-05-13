@@ -154,3 +154,5 @@
 /* Menu button styling */
 .menu-button .arrow { -fx-background-color: transparent; }
 
+/* Admin sidebar section */
+.sidebar-section { -fx-text-fill: #64748B; -fx-font-size: 11px; -fx-padding: 16 24 6 24; -fx-font-weight: bold; -fx-text-transform: uppercase; }

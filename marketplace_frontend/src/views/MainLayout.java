@@ -100,7 +100,13 @@ public class MainLayout {
 
         userMenu.getItems().addAll(themeItem, profileItem, new SeparatorMenuItem(), logoutItem);
 
-        topBar.getChildren().addAll(sidebarToggle, brand, spacerL, spacerR, cartContainer, userMenu);
+        // Admin badge
+        Label adminBadge = new Label("\uD83D\uDEE1\uFE0F Admin");
+        adminBadge.setStyle("-fx-background-color: #EDE9FE; -fx-text-fill: #6D28D9; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;");
+        adminBadge.setVisible(user != null && user.isAdmin());
+        adminBadge.setManaged(user != null && user.isAdmin());
+
+        topBar.getChildren().addAll(sidebarToggle, brand, spacerL, spacerR, adminBadge, cartContainer, userMenu);
         return topBar;
     }
 
@@ -120,6 +126,26 @@ public class MainLayout {
             homeBtn, browseBtn, myProductsBtn, chatBtn, cartBtn,
             myShopBtn, myAccountBtn
         );
+
+        // Admin section — only visible if the current user is an admin
+        User user = SessionManager.getInstance().getCurrentUser();
+        if (user != null && user.isAdmin()) {
+            Region adminSpacer = new Region();
+            adminSpacer.setPrefHeight(16);
+
+            Label adminSection = new Label("\u2699\uFE0F  ADMIN");
+            adminSection.getStyleClass().add("sidebar-section");
+
+            Button adminDashBtn = createNavButton("\uD83D\uDCCA  Dashboard", "admin-dashboard");
+            Button adminUsersBtn = createNavButton("\uD83D\uDC65  Users", "admin-users");
+            Button adminProductsBtn = createNavButton("\uD83D\uDCE6  Products", "admin-products");
+            Button adminTxBtn = createNavButton("\uD83D\uDCB3  Transactions", "admin-transactions");
+
+            sb.getChildren().addAll(
+                adminSpacer, adminSection,
+                adminDashBtn, adminUsersBtn, adminProductsBtn, adminTxBtn
+            );
+        }
 
         return sb;
     }
@@ -178,7 +204,11 @@ public class MainLayout {
             case "myshop": view = new MyShopView(this).getRoot(); break;
             case "myaccount": view = new MyAccountView(this).getRoot(); break;
             case "addproduct": view = new AddProductView(this).getRoot(); break;
-            case "editproduct": view = new HomeView(this).getRoot(); break; // placeholder, editproduct needs product ID
+            case "editproduct": view = new HomeView(this).getRoot(); break;
+            case "admin-dashboard": view = new AdminDashboardView(this).getRoot(); break;
+            case "admin-users": view = new AdminUsersView(this).getRoot(); break;
+            case "admin-products": view = new AdminProductsView(this).getRoot(); break;
+            case "admin-transactions": view = new AdminTransactionsView(this).getRoot(); break;
             default: view = new HomeView(this).getRoot(); break;
         }
         setContent(view);

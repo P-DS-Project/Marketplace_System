@@ -52,4 +52,24 @@ public class AuthService {
             return -1;
         }
     }
+
+    public String extractRoleFromToken(String token) {
+        if (!verifyJWT(token))
+            return null;
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length < 2)
+                return null;
+            String payloadStr = new String(Base64.getDecoder().decode(parts[1]));
+            org.json.JSONObject payload = new org.json.JSONObject(payloadStr);
+            return payload.optString("role", null);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean isAdmin(String token) {
+        return "ADMIN".equals(extractRoleFromToken(token));
+    }
 }
