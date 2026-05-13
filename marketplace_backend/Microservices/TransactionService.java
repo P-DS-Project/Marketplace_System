@@ -50,12 +50,29 @@ public class TransactionService {
                 accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance() + totalCost);
             }
 
+            DAOs.InventoryDAO inventoryDao = new DAOs.InventoryDAO();
+            Entities.InventoryEntity inventory = inventoryDao.getInventoryByProductId(productId);
+            if (inventory == null || inventory.getQuantity() < quantity) {
+                accountDao.updateBalance(buyerId, buyerAcc.getBalance());
+                if (sellerAcc != null) accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
+                return "ERROR: Not enough stock available.";
+            }
+
+            boolean stockReduced = inventoryDao.reduceStock(productId, quantity, inventory.getWarehouse_node());
+            if (!stockReduced) {
+                accountDao.updateBalance(buyerId, buyerAcc.getBalance());
+                if (sellerAcc != null) accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
+                return "ERROR: Failed to reduce inventory stock.";
+            }
+
             boolean logSuccess = transactionDao.insertTransaction(
                 buyerId, product.getSellerId(), productId, quantity, totalCost, "COMPLETED", "PURCHASE"
             );
 
             if (!logSuccess) {
                 accountDao.updateBalance(buyerId, buyerAcc.getBalance());
+                if (sellerAcc != null) accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
+                inventoryDao.addStock(productId, quantity, inventory.getWarehouse_node());
                 return "ERROR: Failed to record transaction. Money refunded.";
             }
 

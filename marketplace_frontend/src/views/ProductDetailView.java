@@ -130,7 +130,7 @@ public class ProductDetailView {
                 // Message seller button
                 Button msgBtn = new Button("\uD83D\uDCAC Message Seller");
                 msgBtn.getStyleClass().addAll("button", "button-outline");
-                msgBtn.setOnAction(e -> layout.navigateTo("chat"));
+                msgBtn.setOnAction(e -> layout.navigateToChat(product.getSellerId()));
                 actions.getChildren().add(msgBtn);
 
                 details.getChildren().addAll(nameLabel, brandLabel, priceLabel, statusLabel, new Separator(), descLabel, infoCard, actions);

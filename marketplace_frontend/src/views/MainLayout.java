@@ -173,7 +173,7 @@ public class MainLayout {
             case "home": view = new HomeView(this).getRoot(); break;
             case "browse": view = new BrowseView(this).getRoot(); break;
             case "myproducts": view = new SellerDashboardView(this).getRoot(); break;
-            case "chat": view = new ChatView().getRoot(); break;
+            case "chat": view = new ChatView(-1).getRoot(); break;
             case "cart": view = new CartView(this).getRoot(); break;
             case "myshop": view = new MyShopView(this).getRoot(); break;
             case "myaccount": view = new MyAccountView(this).getRoot(); break;
@@ -186,6 +186,10 @@ public class MainLayout {
 
     public void navigateToEditProduct(int productId) {
         setContent(new EditProductView(productId, this).getRoot());
+    }
+
+    public void navigateToChat(int sellerId) {
+        setContent(new ChatView(sellerId).getRoot());
     }
 
     public void setContent(Node node) {

@@ -18,7 +18,7 @@ public class TransactionDAO {
 
     public List<TransactionEntity> getTransactionsByUserId(int userId) {
         List<TransactionEntity> transactions = new ArrayList<>();
-        String sql = "SELECT transaction_id, buyer_id, seller_id, product_id, quantity, amount, status, type FROM transactions WHERE buyer_id = ? OR seller_id = ?";
+        String sql = "SELECT transaction_id, buyer_id, seller_id, product_id, quantity, amount, status, type, created_at, completed_at FROM transactions WHERE buyer_id = ? OR seller_id = ?";
         try (Connection conn = getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, userId);

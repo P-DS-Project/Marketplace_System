@@ -21,7 +21,7 @@ public class ChatView {
     private Label headerTitle;
     private VBox chatListContent;
 
-    public ChatView() {
+    public ChatView(int initialUserId) {
         root = new HBox(0);
         root.setPrefHeight(600);
 
@@ -34,27 +34,6 @@ public class ChatView {
         Label chatTitle = new Label("\uD83D\uDCAC Messages");
         chatTitle.getStyleClass().add("subheading");
         chatTitle.setPadding(new Insets(16));
-
-        // Start new chat section
-        HBox newChatBox = new HBox(8);
-        newChatBox.setPadding(new Insets(0, 16, 12, 16));
-        TextField userIdField = new TextField();
-        userIdField.setPromptText("User ID");
-        userIdField.setPrefWidth(100);
-        Button startChatBtn = new Button("New Chat");
-        startChatBtn.getStyleClass().addAll("button");
-        startChatBtn.setStyle("-fx-padding: 8 12; -fx-font-size: 12px;");
-        startChatBtn.setOnAction(e -> {
-            try {
-                int userId = Integer.parseInt(userIdField.getText().trim());
-                selectedUserId = userId;
-                loadConversation(userId);
-                loadChatList();
-            } catch (NumberFormatException ex) {
-                AlertHelper.showError("Invalid Input", "Enter a valid user ID.");
-            }
-        });
-        newChatBox.getChildren().addAll(userIdField, startChatBtn);
 
         // Search conversations
         TextField searchField = new TextField();
@@ -72,7 +51,7 @@ public class ChatView {
         chatListScroll.setContent(chatListContent);
         VBox.setVgrow(chatListScroll, Priority.ALWAYS);
 
-        leftPanel.getChildren().addAll(chatTitle, newChatBox, searchBox, chatListScroll);
+        leftPanel.getChildren().addAll(chatTitle, searchBox, chatListScroll);
 
         // Right panel - message thread
         VBox rightPanel = new VBox(0);
@@ -122,6 +101,12 @@ public class ChatView {
         // Load real chat list
         loadChatList();
 
+        if (initialUserId != -1) {
+            selectedUserId = initialUserId;
+            headerTitle.setText("User #" + initialUserId);
+            loadConversation(initialUserId);
+        }
+
         // Filter conversations by search
         searchField.textProperty().addListener((obs, oldVal, newVal) -> {
             filterChatList(newVal);
@@ -129,8 +114,11 @@ public class ChatView {
     }
 
     private void loadChatList() {
-        int myId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
-        if (myId == -1) return;
+        int myId = SessionManager.getInstance().getCurrentUser() != null
+                ? SessionManager.getInstance().getCurrentUser().getUserId()
+                : -1;
+        if (myId == -1)
+            return;
 
         new Thread(() -> {
             JSONObject result = chatApi.listUserChats(myId);
@@ -153,8 +141,7 @@ public class ChatView {
                     int unreadCount = chat.optInt("unreadCount", 0);
 
                     chatListContent.getChildren().add(
-                        createChatListItem(partnerId, partnerName, lastMessage, unreadCount)
-                    );
+                            createChatListItem(partnerId, partnerName, lastMessage, unreadCount));
                 }
             });
         }).start();
@@ -201,7 +188,7 @@ public class ChatView {
         if (unreadCount > 0) {
             Label unreadBadge = new Label(String.valueOf(unreadCount));
             unreadBadge.setStyle("-fx-background-color: #3B82F6; -fx-text-fill: white; -fx-background-radius: 10; " +
-                "-fx-padding: 2 8; -fx-font-size: 11px; -fx-font-weight: bold;");
+                    "-fx-padding: 2 8; -fx-font-size: 11px; -fx-font-weight: bold;");
             nameRow.getChildren().addAll(userName, unreadBadge);
         } else {
             nameRow.getChildren().add(userName);
@@ -219,7 +206,9 @@ public class ChatView {
             loadConversation(partnerId);
 
             // Mark as read
-            int myId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
+            int myId = SessionManager.getInstance().getCurrentUser() != null
+                    ? SessionManager.getInstance().getCurrentUser().getUserId()
+                    : -1;
             if (myId != -1) {
                 new Thread(() -> {
                     chatApi.markAsRead(myId, partnerId);
@@ -232,7 +221,9 @@ public class ChatView {
     }
 
     private void loadConversation(int otherUserId) {
-        int myId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
+        int myId = SessionManager.getInstance().getCurrentUser() != null
+                ? SessionManager.getInstance().getCurrentUser().getUserId()
+                : -1;
         new Thread(() -> {
             List<ChatMessage> messages = chatApi.getConversation(myId, otherUserId);
             javafx.application.Platform.runLater(() -> {
@@ -250,7 +241,8 @@ public class ChatView {
                         msgLabel.setWrapText(true);
                         msgLabel.setMaxWidth(400);
                         msgLabel.getStyleClass().add(isMine ? "chat-bubble-sent" : "chat-bubble-received");
-                        if (isMine) msgLabel.setStyle(msgLabel.getStyle() + "-fx-text-fill: white;");
+                        if (isMine)
+                            msgLabel.setStyle(msgLabel.getStyle() + "-fx-text-fill: white;");
 
                         Label timeLabel = new Label(msg.getTimestamp() != null ? msg.getTimestamp() : "");
                         timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #94A3B8;");
@@ -269,10 +261,16 @@ public class ChatView {
     }
 
     private void sendMessage() {
-        if (selectedUserId == -1) { AlertHelper.showError("Error", "Select a conversation first."); return; }
+        if (selectedUserId == -1) {
+            AlertHelper.showError("Error", "Select a conversation first.");
+            return;
+        }
         String content = messageInput.getText().trim();
-        if (content.isEmpty()) return;
-        int myId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
+        if (content.isEmpty())
+            return;
+        int myId = SessionManager.getInstance().getCurrentUser() != null
+                ? SessionManager.getInstance().getCurrentUser().getUserId()
+                : -1;
 
         new Thread(() -> {
             String result = chatApi.sendMessage(myId, selectedUserId, content);
@@ -288,5 +286,7 @@ public class ChatView {
         }).start();
     }
 
-    public HBox getRoot() { return root; }
+    public HBox getRoot() {
+        return root;
+    }
 }
