@@ -23,10 +23,13 @@ public class SearchApiService {
         return parseResults(response);
     }
 
-    public List<Product> searchByKeyword(String keyword, String brand, String sortBy, String sortOrder, int limit, int offset) {
+    public List<Product> searchByKeyword(String keyword, String brand, String sortBy, String sortOrder, int limit,
+            int offset) {
         JSONObject payload = new JSONObject();
-        if (keyword != null && !keyword.isEmpty()) payload.put("keyword", keyword);
-        if (brand != null && !brand.isEmpty()) payload.put("brand", brand);
+        if (keyword != null && !keyword.isEmpty())
+            payload.put("keyword", keyword);
+        if (brand != null && !brand.isEmpty())
+            payload.put("brand", brand);
         payload.put("sortBy", sortBy);
         payload.put("sortOrder", sortOrder);
         payload.put("limit", limit);
@@ -39,18 +42,27 @@ public class SearchApiService {
     /**
      * Unified filter/search method with optional keyword parameter.
      */
-    public List<Product> filterProducts(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String brand,
-                                        Integer sellerId, String startDate, String endDate,
-                                        String sortBy, String sortOrder, int limit, int offset) {
+    public List<Product> filterProducts(String keyword, Integer categoryId, Double minPrice, Double maxPrice,
+            String brand,
+            Integer sellerId, String startDate, String endDate,
+            String sortBy, String sortOrder, int limit, int offset) {
         JSONObject payload = new JSONObject();
-        if (keyword != null && !keyword.isEmpty()) payload.put("keyword", keyword);
-        if (categoryId != null) payload.put("categoryId", categoryId);
-        if (minPrice != null) payload.put("minPrice", minPrice);
-        if (maxPrice != null) payload.put("maxPrice", maxPrice);
-        if (brand != null && !brand.isEmpty()) payload.put("brand", brand);
-        if (sellerId != null) payload.put("sellerId", sellerId);
-        if (startDate != null && !startDate.isEmpty()) payload.put("startDate", startDate);
-        if (endDate != null && !endDate.isEmpty()) payload.put("endDate", endDate);
+        if (keyword != null && !keyword.isEmpty())
+            payload.put("keyword", keyword);
+        if (categoryId != null)
+            payload.put("categoryId", categoryId);
+        if (minPrice != null)
+            payload.put("minPrice", minPrice);
+        if (maxPrice != null)
+            payload.put("maxPrice", maxPrice);
+        if (brand != null && !brand.isEmpty())
+            payload.put("brand", brand);
+        if (sellerId != null)
+            payload.put("sellerId", sellerId);
+        if (startDate != null && !startDate.isEmpty())
+            payload.put("startDate", startDate);
+        if (endDate != null && !endDate.isEmpty())
+            payload.put("endDate", endDate);
         payload.put("sortBy", sortBy);
         payload.put("sortOrder", sortOrder);
         payload.put("limit", limit);

@@ -76,7 +76,10 @@ public class SearchView {
         Button clearFilters = new Button("Clear");
         clearFilters.getStyleClass().addAll("button", "button-secondary");
         clearFilters.setOnAction(e -> {
-            brandField.clear(); minPriceField.clear(); maxPriceField.clear(); catField.clear();
+            brandField.clear();
+            minPriceField.clear();
+            maxPriceField.clear();
+            catField.clear();
             performSearch(keywordField.getText(), null, null, null, null, null);
         });
 
@@ -102,13 +105,15 @@ public class SearchView {
         }
     }
 
-    private void performSearch(String keyword, String brand, Double minPrice, Double maxPrice, Integer catId, Integer sellerId) {
+    private void performSearch(String keyword, String brand, Double minPrice, Double maxPrice, Integer catId,
+            Integer sellerId) {
         new Thread(() -> {
             List<Product> products;
             if (keyword != null && !keyword.trim().isEmpty()) {
                 products = searchApi.searchByKeyword(keyword.trim(), brand, "created_at", "DESC", 50, 0);
             } else {
-                products = searchApi.filterProducts(catId, minPrice, maxPrice, brand, sellerId, null, null, "created_at", "DESC", 50, 0);
+                products = searchApi.filterProducts(keyword, catId, minPrice, maxPrice, brand, sellerId, null, null,
+                        "created_at", "DESC", 50, 0);
             }
             javafx.application.Platform.runLater(() -> {
                 resultGrid.getChildren().clear();
@@ -160,13 +165,22 @@ public class SearchView {
     }
 
     private Double parseDouble(String s) {
-        try { return s != null && !s.trim().isEmpty() ? Double.parseDouble(s.trim()) : null; }
-        catch (NumberFormatException e) { return null; }
-    }
-    private Integer parseInt(String s) {
-        try { return s != null && !s.trim().isEmpty() ? Integer.parseInt(s.trim()) : null; }
-        catch (NumberFormatException e) { return null; }
+        try {
+            return s != null && !s.trim().isEmpty() ? Double.parseDouble(s.trim()) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
-    public ScrollPane getRoot() { return root; }
+    private Integer parseInt(String s) {
+        try {
+            return s != null && !s.trim().isEmpty() ? Integer.parseInt(s.trim()) : null;
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
+
+    public ScrollPane getRoot() {
+        return root;
+    }
 }
