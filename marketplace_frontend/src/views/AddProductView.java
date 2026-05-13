@@ -110,7 +110,9 @@ public class AddProductView {
             }
 
             double price;
-            try { price = Double.parseDouble(priceStr); } catch (NumberFormatException ex) {
+            try {
+                price = Double.parseDouble(priceStr);
+            } catch (NumberFormatException ex) {
                 showError(errorLabel, "Enter a valid price.");
                 return;
             }
@@ -120,7 +122,9 @@ public class AddProductView {
             }
 
             int quantity;
-            try { quantity = Integer.parseInt(qtyStr); } catch (NumberFormatException ex) {
+            try {
+                quantity = Integer.parseInt(qtyStr);
+            } catch (NumberFormatException ex) {
                 showError(errorLabel, "Enter a valid stock quantity.");
                 return;
             }
@@ -140,9 +144,11 @@ public class AddProductView {
                     InventoryApiService inventoryApi = new InventoryApiService();
                     // Try to get productId from the result if possible, otherwise ignore inventory
                     try {
-                        org.json.JSONObject resJson = new org.json.JSONObject(result.replace("Product added successfully", "{}"));
+                        org.json.JSONObject resJson = new org.json.JSONObject(
+                                result.replace("Product added successfully", "{}"));
                         // inventory handled by product creation
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
                 AlertHelper.showSuccess("Product added successfully!");
                 layout.navigateTo("myproducts");
@@ -152,15 +158,14 @@ public class AddProductView {
         });
 
         formCard.getChildren().addAll(
-            nameLabel, nameField,
-            priceLabel, priceField,
-            catLabel, catCombo,
-            brandLabel, brandField,
-            descLabel, descField,
-            imgLabel, imgField,
-            qtyLabel, qtyField,
-            errorLabel, submitBtn
-        );
+                nameLabel, nameField,
+                priceLabel, priceField,
+                catLabel, catCombo,
+                brandLabel, brandField,
+                descLabel, descField,
+                imgLabel, imgField,
+                qtyLabel, qtyField,
+                errorLabel, submitBtn);
 
         content.getChildren().addAll(backBtn, title, formCard);
 
@@ -175,5 +180,7 @@ public class AddProductView {
         errorLabel.setManaged(true);
     }
 
-    public ScrollPane getRoot() { return root; }
+    public ScrollPane getRoot() {
+        return root;
+    }
 }

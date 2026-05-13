@@ -104,6 +104,10 @@ INSERT INTO cart_items (cart_item_id, user_id, product_id, quantity, added_at) V
   (14,  3,  9, 1, '2026-05-11 07:30:00'),
   (15,  7, 13, 1, '2026-04-30 20:00:00');
 
+SELECT setval(pg_get_serial_sequence('users', 'user_id'), COALESCE(MAX(user_id), 1)) FROM users;
+SELECT setval(pg_get_serial_sequence('accounts', 'account_id'), COALESCE(MAX(account_id), 1)) FROM accounts;
+SELECT setval(pg_get_serial_sequence('chat_messages', 'message_id'), COALESCE(MAX(message_id), 1)) FROM chat_messages;
+SELECT setval(pg_get_serial_sequence('cart_items', 'cart_item_id'), COALESCE(MAX(cart_item_id), 1)) FROM cart_items;
 
 -- ============================================================
 --  NODE 2  –  Categories, Products, Inventory
@@ -173,6 +177,10 @@ INSERT INTO inventory (inventory_id, product_id, quantity, warehouse_node, updat
   (16, 16,  25, 'node2_alex',       '2026-04-01 09:00:00'),
   (17, 17,   0, 'node2_cairo',      '2026-03-01 12:00:00'),
   (18, 18,   0, 'node2_cairo',      '2026-02-15 09:00:00');
+
+SELECT setval(pg_get_serial_sequence('categories', 'category_id'), COALESCE(MAX(category_id), 1)) FROM categories;
+SELECT setval(pg_get_serial_sequence('products', 'product_id'), COALESCE(MAX(product_id), 1)) FROM products;
+SELECT setval(pg_get_serial_sequence('inventory', 'inventory_id'), COALESCE(MAX(inventory_id), 1)) FROM inventory;
 
 
 -- ============================================================
@@ -253,3 +261,6 @@ INSERT INTO reports (report_id, generated_by, type, parameters, content, generat
    '{"period": "2026-YTD", "limit": 5}',
    'Year-to-date top sellers by revenue: 1) TechZone (EGP 238,298) 2) Ramy Electronics (EGP 74,598) 3) Salma Crafts (EGP 9,150) 4) Menna Boutique (EGP 5,170). Total marketplace GMV: EGP 327,216.',
    '2026-05-11 07:00:00');
+
+SELECT setval(pg_get_serial_sequence('transactions', 'transaction_id'), COALESCE(MAX(transaction_id), 1)) FROM transactions;
+SELECT setval(pg_get_serial_sequence('reports', 'report_id'), COALESCE(MAX(report_id), 1)) FROM reports;

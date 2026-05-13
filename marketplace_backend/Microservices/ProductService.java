@@ -16,7 +16,8 @@ public class ProductService {
         return addProduct(sellerId, categoryId, name, price, description, null, null);
     }
 
-    public String addProduct(int sellerId, int categoryId, String name, double price, String description, String brand, String imageUrl) {
+    public String addProduct(int sellerId, int categoryId, String name, double price, String description, String brand,
+            String imageUrl) {
         if (name == null || name.length() < 3) {
             return "ERROR: Product name must be at least 3 characters.";
         }
@@ -30,8 +31,12 @@ public class ProductService {
             res.put("message", "Product added successfully");
             res.put("productId", productId);
             return "SUCCESS " + res.toString();
+        } else if (productId == -1) {
+            return "ERROR: Failed to add product.";
+        } else {
+            return "ERROR: Database error occurred.";
         }
-        return "ERROR: Failed to add product.";
+
     }
 
     public String getProductsBySeller(int sellerId) {
@@ -71,9 +76,12 @@ public class ProductService {
         return updateProduct(productId, name, price, description, null, null);
     }
 
-    public boolean updateProduct(int productId, String name, double price, String description, String brand, String imageUrl) {
-        if (name != null && name.length() < 3) return false;
-        if (price < 0) return false;
+    public boolean updateProduct(int productId, String name, double price, String description, String brand,
+            String imageUrl) {
+        if (name != null && name.length() < 3)
+            return false;
+        if (price < 0)
+            return false;
         return productDao.updateProduct(productId, name, price, description, brand, imageUrl);
     }
 
@@ -88,7 +96,8 @@ public class ProductService {
         obj.put("status", p.getStatus());
         obj.put("description", p.getDescription() != null ? p.getDescription() : "");
         obj.put("imageUrl", p.getImageUrl() != null ? p.getImageUrl() : "");
-        if (p.getCreatedAt() != null) obj.put("createdAt", p.getCreatedAt().toString());
+        if (p.getCreatedAt() != null)
+            obj.put("createdAt", p.getCreatedAt().toString());
         return obj;
     }
 }

@@ -16,7 +16,8 @@ public class ProductDAO {
         return DatabaseConnectionManager.getNode2ProductsConnection();
     }
 
-    public int addProduct(int sellerId, int categoryId, String name, double price, String description, String brand, String imageUrl) {
+    public int addProduct(int sellerId, int categoryId, String name, double price, String description, String brand,
+            String imageUrl) {
         String sql = "INSERT INTO products (seller_id, category_id, name, price, status, description, brand, image_url) VALUES (?, ?, ?, ?, 'AVAILABLE', ?, ?, ?)";
         try (Connection conn = getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
@@ -29,12 +30,13 @@ public class ProductDAO {
             pstmt.setString(7, imageUrl);
             pstmt.executeUpdate();
             try (ResultSet rs = pstmt.getGeneratedKeys()) {
-                if (rs.next()) return rs.getInt(1);
+                if (rs.next())
+                    return rs.getInt(1);
             }
             return -1;
         } catch (SQLException e) {
             e.printStackTrace();
-            return -1;
+            return -2;
         }
     }
 
@@ -65,7 +67,8 @@ public class ProductDAO {
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, productId);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next())
+                    return mapRow(rs);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -119,7 +122,8 @@ public class ProductDAO {
         return updateProduct(productId, name, price, description, null, null);
     }
 
-    public boolean updateProduct(int productId, String name, double price, String description, String brand, String imageUrl) {
+    public boolean updateProduct(int productId, String name, double price, String description, String brand,
+            String imageUrl) {
         String sql = "UPDATE products SET name = ?, price = ?, description = ?, brand = ?, image_url = ?, updated_at = CURRENT_TIMESTAMP WHERE product_id = ?";
         try (Connection conn = getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -136,9 +140,12 @@ public class ProductDAO {
         }
     }
 
-    public List<ProductEntity> advancedSearch(String keyword, Integer categoryId, Double minPrice, Double maxPrice, String brand, Integer sellerId, String startDate, String endDate, String sortBy, String sortOrder, int limit, int offset) {
+    public List<ProductEntity> advancedSearch(String keyword, Integer categoryId, Double minPrice, Double maxPrice,
+            String brand, Integer sellerId, String startDate, String endDate, String sortBy, String sortOrder,
+            int limit, int offset) {
         List<ProductEntity> products = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT product_id, seller_id, category_id, name, brand, price, status, description, image_url, created_at FROM products WHERE 1=1");
+        StringBuilder sql = new StringBuilder(
+                "SELECT product_id, seller_id, category_id, name, brand, price, status, description, image_url, created_at FROM products WHERE 1=1");
         List<Object> params = new ArrayList<>();
 
         if (keyword != null && !keyword.trim().isEmpty()) {
@@ -176,15 +183,18 @@ public class ProductDAO {
 
         if (sortBy != null && !sortBy.trim().isEmpty()) {
             String safeSortBy = "created_at";
-            if (sortBy.equalsIgnoreCase("price")) safeSortBy = "price";
-            else if (sortBy.equalsIgnoreCase("name")) safeSortBy = "name";
+            if (sortBy.equalsIgnoreCase("price"))
+                safeSortBy = "price";
+            else if (sortBy.equalsIgnoreCase("name"))
+                safeSortBy = "name";
 
             String safeOrder = "DESC";
-            if ("ASC".equalsIgnoreCase(sortOrder)) safeOrder = "ASC";
+            if ("ASC".equalsIgnoreCase(sortOrder))
+                safeOrder = "ASC";
 
             sql.append(" ORDER BY ").append(safeSortBy).append(" ").append(safeOrder);
         } else {
-             sql.append(" ORDER BY created_at DESC");
+            sql.append(" ORDER BY created_at DESC");
         }
 
         sql.append(" LIMIT ? OFFSET ?");
@@ -192,7 +202,7 @@ public class ProductDAO {
         params.add(offset >= 0 ? offset : 0);
 
         try (Connection conn = getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
+                PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
 
             for (int i = 0; i < params.size(); i++) {
                 pstmt.setObject(i + 1, params.get(i));
@@ -220,7 +230,10 @@ public class ProductDAO {
         p.setStatus(rs.getString("status"));
         p.setDescription(rs.getString("description"));
         p.setImageUrl(rs.getString("image_url"));
-        try { p.setCreatedAt(rs.getTimestamp("created_at")); } catch (SQLException ignored) {}
+        try {
+            p.setCreatedAt(rs.getTimestamp("created_at"));
+        } catch (SQLException ignored) {
+        }
         return p;
     }
 }

@@ -15,15 +15,18 @@ public class ProductApiService {
         return addProduct(sellerId, categoryId, name, price, description, null, null);
     }
 
-    public String addProduct(int sellerId, int categoryId, String name, double price, String description, String brand, String imageUrl) {
+    public String addProduct(int sellerId, int categoryId, String name, double price, String description, String brand,
+            String imageUrl) {
         JSONObject payload = new JSONObject();
         payload.put("sellerId", sellerId);
         payload.put("categoryId", categoryId);
         payload.put("name", name);
         payload.put("price", price);
         payload.put("description", description);
-        if (brand != null && !brand.isEmpty()) payload.put("brand", brand);
-        if (imageUrl != null && !imageUrl.isEmpty()) payload.put("imageUrl", imageUrl);
+        if (brand != null && !brand.isEmpty())
+            payload.put("brand", brand);
+        if (imageUrl != null && !imageUrl.isEmpty())
+            payload.put("imageUrl", imageUrl);
 
         String response = client.sendRequest("PRODUCT", "ADD", payload);
         int code = SocketClient.getStatusCode(response);
@@ -32,7 +35,7 @@ public class ProductApiService {
         if (code == 200 || code == 201) {
             return body.optString("message", "Product added successfully");
         }
-        return "ERROR: " + body.optString("error", "Failed to add product");
+        return "ERROR: " + body; // .optString("error", "Failed to add product");
     }
 
     public List<Product> getProductsBySeller(int sellerId) {
@@ -69,14 +72,17 @@ public class ProductApiService {
         return updateProduct(productId, name, price, description, null, null);
     }
 
-    public String updateProduct(int productId, String name, double price, String description, String brand, String imageUrl) {
+    public String updateProduct(int productId, String name, double price, String description, String brand,
+            String imageUrl) {
         JSONObject payload = new JSONObject();
         payload.put("productId", productId);
         payload.put("name", name);
         payload.put("price", price);
         payload.put("description", description);
-        if (brand != null) payload.put("brand", brand);
-        if (imageUrl != null) payload.put("imageUrl", imageUrl);
+        if (brand != null)
+            payload.put("brand", brand);
+        if (imageUrl != null)
+            payload.put("imageUrl", imageUrl);
 
         String response = client.sendRequest("PRODUCT", "UPDATE_PRODUCT", payload);
         int code = SocketClient.getStatusCode(response);
