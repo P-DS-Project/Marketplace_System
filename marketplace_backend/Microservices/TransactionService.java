@@ -19,7 +19,8 @@ public class TransactionService {
     }
 
     public String processPurchase(int buyerId, int productId, int quantity) {
-        if (quantity <= 0) return "ERROR: Invalid quantity.";
+        if (quantity <= 0)
+            return "ERROR: Invalid quantity.";
 
         try {
             ProductEntity product = productDao.getProductById(productId);
@@ -54,24 +55,26 @@ public class TransactionService {
             Entities.InventoryEntity inventory = inventoryDao.getInventoryByProductId(productId);
             if (inventory == null || inventory.getQuantity() < quantity) {
                 accountDao.updateBalance(buyerId, buyerAcc.getBalance());
-                if (sellerAcc != null) accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
+                if (sellerAcc != null)
+                    accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
                 return "ERROR: Not enough stock available.";
             }
 
             boolean stockReduced = inventoryDao.reduceStock(productId, quantity, inventory.getWarehouse_node());
             if (!stockReduced) {
                 accountDao.updateBalance(buyerId, buyerAcc.getBalance());
-                if (sellerAcc != null) accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
+                if (sellerAcc != null)
+                    accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
                 return "ERROR: Failed to reduce inventory stock.";
             }
 
             boolean logSuccess = transactionDao.insertTransaction(
-                buyerId, product.getSellerId(), productId, quantity, totalCost, "COMPLETED", "PURCHASE"
-            );
+                    buyerId, product.getSellerId(), productId, quantity, totalCost, "COMPLETED", "PURCHASE");
 
             if (!logSuccess) {
                 accountDao.updateBalance(buyerId, buyerAcc.getBalance());
-                if (sellerAcc != null) accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
+                if (sellerAcc != null)
+                    accountDao.updateBalance(product.getSellerId(), sellerAcc.getBalance());
                 inventoryDao.addStock(productId, quantity, inventory.getWarehouse_node());
                 return "ERROR: Failed to record transaction. Money refunded.";
             }
@@ -89,7 +92,8 @@ public class TransactionService {
     }
 
     public String processDeposit(int userId, double amount) {
-        if (amount <= 0) return "ERROR: Deposit amount must be positive.";
+        if (amount <= 0)
+            return "ERROR: Deposit amount must be positive.";
 
         try {
             AccountEntity account = accountDao.getAccountByUserId(userId);
@@ -104,9 +108,7 @@ public class TransactionService {
                 return "ERROR: Failed to process deposit.";
             }
 
-            boolean logSuccess = transactionDao.insertTransaction(
-                userId, 0, 0, 0, amount, "COMPLETED", "DEPOSIT"
-            );
+            transactionDao.insertTransaction(userId, 0, 0, 0, amount, "COMPLETED", "DEPOSIT");
 
             JSONObject res = new JSONObject();
             res.put("message", "Deposit successful");

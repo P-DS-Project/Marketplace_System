@@ -3,13 +3,10 @@ package Microservices;
 import DAOs.TransactionDAO;
 import DAOs.ProductDAO;
 import DAOs.InventoryDAO;
-import DAOs.UserDAO;
-import DAOs.AccountDAO;
+
 import Entities.TransactionEntity;
 import Entities.ProductEntity;
 import Entities.InventoryEntity;
-import Entities.AccountEntity;
-import Entities.UserEntity;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -20,15 +17,12 @@ public class ReportService {
     private final TransactionDAO transactionDao;
     private final ProductDAO productDao;
     private final InventoryDAO inventoryDao;
-    private final UserDAO userDao;
-    private final AccountDAO accountDao;
 
     public ReportService() {
         this.transactionDao = new TransactionDAO();
         this.productDao = new ProductDAO();
         this.inventoryDao = new InventoryDAO();
-        this.userDao = new UserDAO();
-        this.accountDao = new AccountDAO();
+
     }
 
     public String getTransactionHistory(int userId) {
