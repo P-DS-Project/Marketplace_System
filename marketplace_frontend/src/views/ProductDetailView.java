@@ -88,11 +88,20 @@ public class ProductDetailView {
                 priceLabel.setStyle("-fx-font-size: 32px;");
 
                 Label statusLabel = new Label(product.getStatus());
-                statusLabel.getStyleClass().addAll("badge", "AVAILABLE".equals(product.getStatus()) ? "badge-available" : "badge-sold");
+                statusLabel.getStyleClass().addAll("badge", "IN_STOCK".equals(product.getStatus()) ? "badge-available" : "badge-sold");
 
                 Label descLabel = new Label(product.getDescription() != null && !product.getDescription().isEmpty() ? product.getDescription() : "No description available.");
                 descLabel.setWrapText(true);
                 descLabel.setStyle("-fx-font-size: 14px; -fx-line-spacing: 4;");
+
+                int currentUserId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
+
+                String stockText;
+                if (currentUserId == product.getSellerId()) {
+                    stockText = "Stock: " + (inventory != null ? inventory.getQuantity() + " units" : "N/A");
+                } else {
+                    stockText = "Stock: " + (inventory != null && inventory.getQuantity() > 0 ? "In Stock" : "Out of Stock");
+                }
 
                 VBox infoCard = new VBox(8);
                 infoCard.getStyleClass().add("card");
@@ -100,15 +109,14 @@ public class ProductDetailView {
                     new Label("Product ID: " + product.getProductId()),
                     new Label("Seller ID: " + product.getSellerId()),
                     new Label("Category ID: " + product.getCategoryId()),
-                    new Label("Stock: " + (inventory != null ? inventory.getQuantity() + " units" : "N/A")),
+                    new Label(stockText),
                     new Label("Warehouse: " + (inventory != null ? inventory.getWarehouseNode() : "N/A"))
                 );
 
                 // Action buttons
                 HBox actions = new HBox(12);
-                int currentUserId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
 
-                if ("AVAILABLE".equals(product.getStatus()) && product.getSellerId() != currentUserId) {
+                if ("IN_STOCK".equals(product.getStatus()) && product.getSellerId() != currentUserId) {
                     // Add to Cart button
                     Button addCartBtn = new Button("\uD83D\uDED2 Add to Cart");
                     addCartBtn.getStyleClass().addAll("button", "button-success");

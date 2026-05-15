@@ -103,9 +103,9 @@ public class ReportService {
             int activeProducts = 0;
             int soldProducts = 0;
             for (ProductEntity p : products) {
-                if ("AVAILABLE".equals(p.getStatus()))
+                if ("IN_STOCK".equals(p.getStatus()))
                     activeProducts++;
-                if ("SOLD".equals(p.getStatus()))
+                if ("OUT_OF_STOCK".equals(p.getStatus()))
                     soldProducts++;
             }
 
@@ -181,9 +181,9 @@ public class ReportService {
             int availableProducts = 0;
             int soldProducts = 0;
             for (ProductEntity p : products) {
-                if ("AVAILABLE".equals(p.getStatus()))
+                if ("IN_STOCK".equals(p.getStatus()))
                     availableProducts++;
-                if ("SOLD".equals(p.getStatus()))
+                if ("OUT_OF_STOCK".equals(p.getStatus()))
                     soldProducts++;
             }
 

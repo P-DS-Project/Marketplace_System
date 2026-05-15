@@ -76,7 +76,7 @@ CREATE TABLE products (
     description TEXT,
     price DECIMAL(10,2) NOT NULL,
     image_url VARCHAR(500),
-    status VARCHAR(20) CHECK (status IN ('AVAILABLE', 'SOLD', 'REMOVED')),
+    status VARCHAR(20) CHECK (status IN ('IN_STOCK', 'OUT_OF_STOCK', 'UNAVAILABLE')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (product_id),

@@ -198,8 +198,8 @@ public class ReportsView {
                 HBox stats = new HBox(16);
                 stats.getChildren().addAll(
                     miniStat("Total Products", String.valueOf(report.optInt("totalProducts", 0))),
-                    miniStat("Available", String.valueOf(report.optInt("availableProducts", 0))),
-                    miniStat("Sold", String.valueOf(report.optInt("soldProducts", 0)))
+                    miniStat("IN_STOCK", String.valueOf(report.optInt("availableProducts", 0))),
+                    miniStat("OUT_OF_STOCK", String.valueOf(report.optInt("soldProducts", 0)))
                 );
 
                 reportContent.getChildren().addAll(rTitle, stats);
@@ -224,8 +224,8 @@ public class ReportsView {
         Label badge = new Label(status);
         String cls = "badge-pending";
         if ("COMPLETED".equals(status)) cls = "badge-completed";
-        else if ("AVAILABLE".equals(status)) cls = "badge-available";
-        else if ("SOLD".equals(status)) cls = "badge-sold";
+        else if ("IN_STOCK".equals(status)) cls = "badge-available";
+        else if ("OUT_OF_STOCK".equals(status)) cls = "badge-sold";
         badge.getStyleClass().addAll("badge", cls);
         return badge;
     }

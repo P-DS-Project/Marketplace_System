@@ -142,12 +142,14 @@ public class AddProductView {
             if (!result.startsWith("ERROR")) {
                 if (quantity > 0) {
                     InventoryApiService inventoryApi = new InventoryApiService();
-                    // Try to get productId from the result if possible, otherwise ignore inventory
                     try {
-                        org.json.JSONObject resJson = new org.json.JSONObject(
-                                result.replace("Product added successfully", "{}"));
-                        // inventory handled by product creation
+                        org.json.JSONObject resJson = new org.json.JSONObject(result);
+                        int productId = resJson.optInt("productId", -1);
+                        if (productId != -1) {
+                            inventoryApi.addStock(productId, quantity, "Main_Warehouse");
+                        }
                     } catch (Exception ignored) {
+                        System.out.println("Could not parse productId for inventory.");
                     }
                 }
                 AlertHelper.showSuccess("Product added successfully!");

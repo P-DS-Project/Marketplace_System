@@ -107,7 +107,7 @@ public class ProfileView {
                             name.setStyle("-fx-font-weight: bold;");
                             Label price = new Label("$" + String.format("%.2f", p.optDouble("price", 0)));
                             Label status = new Label(p.optString("status", ""));
-                            status.getStyleClass().addAll("badge", "AVAILABLE".equals(p.optString("status")) ? "badge-available" : "badge-sold");
+                            status.getStyleClass().addAll("badge", "IN_STOCK".equals(p.optString("status")) ? "badge-available" : "badge-sold");
                             row.getChildren().addAll(name, price, status);
                             prodList.getChildren().add(row);
                         }

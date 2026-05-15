@@ -57,8 +57,8 @@ public class ProductService {
     }
 
     public String updateProductStatus(int productId, String newStatus) {
-        if (!"AVAILABLE".equals(newStatus) && !"SOLD".equals(newStatus)) {
-            return "ERROR: Invalid status. Must be AVAILABLE or SOLD.";
+        if (!"UNAVAILABLE".equals(newStatus) && !"IN_STOCK".equals(newStatus) && !"OUT_OF_STOCK".equals(newStatus)) {
+            return "ERROR: Invalid status. Must be IN_STOCK, OUT_OF_STOCK, or UNAVAILABLE.";
         }
         boolean success = productDao.updateProductStatus(productId, newStatus);
         return success ? "SUCCESS: Product status updated." : "ERROR: Failed to update product status.";

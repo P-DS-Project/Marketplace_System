@@ -50,6 +50,20 @@ public class TransactionHandler implements ServiceHandler {
                     return "400 {\"error\":\"" + result + "\"}";
                 }
             }
+            case "WITHDRAW": {
+                int userId = json.optInt("userId", -1);
+                double amount = json.optDouble("amount", 0);
+
+                if (userId == -1) return "400 {\"error\":\"Missing userId\"}";
+                if (amount <= 0) return "400 {\"error\":\"Invalid withdrawal amount\"}";
+
+                String result = transactionService.processWithdraw(userId, amount);
+                if (result.startsWith("SUCCESS")) {
+                    return "200 " + result.substring(result.indexOf(" ") + 1);
+                } else {
+                    return "400 {\"error\":\"" + result + "\"}";
+                }
+            }
             default:
                 return "400 {\"error\":\"Unknown Transaction Action: " + action + "\"}";
         }

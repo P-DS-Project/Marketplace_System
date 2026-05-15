@@ -24,7 +24,7 @@ public class TransactionService {
 
         try {
             ProductEntity product = productDao.getProductById(productId);
-            if (product == null || !"AVAILABLE".equals(product.getStatus())) {
+            if (product == null || !"IN_STOCK".equals(product.getStatus())) {
                 return "ERROR: Product not found or unavailable.";
             }
 
@@ -113,6 +113,41 @@ public class TransactionService {
             JSONObject res = new JSONObject();
             res.put("message", "Deposit successful");
             res.put("depositedAmount", amount);
+            res.put("newBalance", newBalance);
+
+            return "SUCCESS " + res.toString();
+
+        } catch (Exception e) {
+            return "ERROR: Internal server failure.";
+        }
+    }
+
+    public String processWithdraw(int userId, double amount) {
+        if (amount <= 0)
+            return "ERROR: Withdrawal amount must be positive.";
+
+        try {
+            AccountEntity account = accountDao.getAccountByUserId(userId);
+            if (account == null) {
+                return "ERROR: Account not found.";
+            }
+
+            if (account.getBalance() < amount) {
+                return "ERROR: Insufficient funds.";
+            }
+
+            double newBalance = account.getBalance() - amount;
+            boolean success = accountDao.updateBalance(userId, newBalance);
+
+            if (!success) {
+                return "ERROR: Failed to process withdrawal.";
+            }
+
+            transactionDao.insertTransaction(userId, 0, 0, 0, amount, "COMPLETED", "WITHDRAWAL");
+
+            JSONObject res = new JSONObject();
+            res.put("message", "Withdrawal successful");
+            res.put("withdrawnAmount", amount);
             res.put("newBalance", newBalance);
 
             return "SUCCESS " + res.toString();

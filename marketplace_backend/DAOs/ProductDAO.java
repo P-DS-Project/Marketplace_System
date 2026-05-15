@@ -18,7 +18,7 @@ public class ProductDAO {
 
     public int addProduct(int sellerId, int categoryId, String name, double price, String description, String brand,
             String imageUrl) {
-        String sql = "INSERT INTO products (seller_id, category_id, name, price, status, description, brand, image_url) VALUES (?, ?, ?, ?, 'AVAILABLE', ?, ?, ?)";
+        String sql = "INSERT INTO products (seller_id, category_id, name, price, status, description, brand, image_url) VALUES (?, ?, ?, ?, 'IN_STOCK', ?, ?, ?)";
         try (Connection conn = getConnection();
                 PreparedStatement pstmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
             pstmt.setInt(1, sellerId);

@@ -132,6 +132,27 @@ public class UserApiService {
         return result;
     }
 
+    public JSONObject withdraw(int userId, double amount) {
+        JSONObject payload = new JSONObject();
+        payload.put("userId", userId);
+        payload.put("amount", amount);
+
+        String response = client.sendRequest("TRANSACTION", "WITHDRAW", payload);
+        int code = SocketClient.getStatusCode(response);
+        JSONObject body = SocketClient.getResponseBody(response);
+
+        JSONObject result = new JSONObject();
+        if (code == 200) {
+            result.put("success", true);
+            result.put("message", body.optString("message", "Withdrawal successful"));
+            result.put("newBalance", body.optDouble("newBalance", 0));
+        } else {
+            result.put("success", false);
+            result.put("error", body.optString("error", "Withdrawal failed"));
+        }
+        return result;
+    }
+
     public String getUsername(int userId) {
         JSONObject payload = new JSONObject();
         payload.put("userId", userId);

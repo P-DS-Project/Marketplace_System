@@ -77,8 +77,8 @@ public class AdminProductsView {
                 if (empty || item == null) { setGraphic(null); return; }
                 Label badge = new Label(item);
                 badge.getStyleClass().add("badge");
-                if ("AVAILABLE".equals(item)) badge.getStyleClass().add("badge-available");
-                else if ("SOLD".equals(item)) badge.getStyleClass().add("badge-sold");
+                if ("IN_STOCK".equals(item)) badge.getStyleClass().add("badge-available");
+                else if ("OUT_OF_STOCK".equals(item)) badge.getStyleClass().add("badge-sold");
                 else badge.setStyle("-fx-background-color: #E2E8F0; -fx-text-fill: #475569; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;");
                 setGraphic(badge); setText(null);
             }

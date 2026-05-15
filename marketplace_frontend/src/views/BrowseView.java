@@ -250,7 +250,7 @@ public class BrowseView {
         brand.getStyleClass().add("product-brand");
 
         Label status = new Label(p.getStatus());
-        status.getStyleClass().addAll("badge", "AVAILABLE".equals(p.getStatus()) ? "badge-available" : "badge-sold");
+        status.getStyleClass().addAll("badge", "IN_STOCK".equals(p.getStatus()) ? "badge-available" : "badge-sold");
 
         info.getChildren().addAll(name, brand, price, status);
         card.getChildren().addAll(imgPlaceholder, info);

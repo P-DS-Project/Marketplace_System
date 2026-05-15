@@ -28,7 +28,7 @@ public class CartService {
         if (product == null) {
             return "ERROR: Product not found.";
         }
-        if (!"AVAILABLE".equals(product.getStatus())) {
+        if (!"IN_STOCK".equals(product.getStatus())) {
             return "ERROR: Product is not available.";
         }
         if (product.getSellerId() == userId) {

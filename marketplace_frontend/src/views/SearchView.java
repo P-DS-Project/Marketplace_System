@@ -151,7 +151,7 @@ public class SearchView {
         Label price = new Label(String.format("$%.2f", p.getPrice()));
         price.getStyleClass().add("product-price");
         Label status = new Label(p.getStatus());
-        status.getStyleClass().addAll("badge", "AVAILABLE".equals(p.getStatus()) ? "badge-available" : "badge-sold");
+        status.getStyleClass().addAll("badge", "IN_STOCK".equals(p.getStatus()) ? "badge-available" : "badge-sold");
         info.getChildren().addAll(name, price, status);
         card.getChildren().addAll(imgPlaceholder, info);
         return card;

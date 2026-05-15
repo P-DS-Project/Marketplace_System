@@ -27,7 +27,8 @@ public class HomeView {
         // Welcome Banner
         VBox banner = new VBox(8);
         banner.getStyleClass().add("welcome-banner");
-        Label welcomeTitle = new Label("Welcome back, " + (user != null ? user.getUsername() : "User") + "! \uD83D\uDC4B");
+        Label welcomeTitle = new Label(
+                "Welcome back, " + (user != null ? user.getUsername() : "User") + "! \uD83D\uDC4B");
         welcomeTitle.getStyleClass().add("welcome-title");
         Label welcomeSub = new Label("Explore the marketplace, discover products, and manage your business.");
         welcomeSub.getStyleClass().add("welcome-subtitle");
@@ -57,7 +58,8 @@ public class HomeView {
         content.getChildren().add(insightsRow);
 
         // Recent Products section
-        Label recentHeader = createSectionHeader("Recent Products", "See More \u25B6", () -> layout.navigateTo("browse"));
+        Label recentHeader = createSectionHeader("Recent Products", "See More \u25B6",
+                () -> layout.navigateTo("browse"));
         FlowPane recentGrid = new FlowPane(16, 16);
         content.getChildren().addAll(recentHeader, recentGrid);
 
@@ -72,9 +74,11 @@ public class HomeView {
             ReportApiService reportApi = new ReportApiService();
 
             // Recent products
-            List<Product> recentProducts = searchApi.filterProducts(null, null, null, null, null, null, null, null, "created_at", "DESC", 4, 0);
+            List<Product> recentProducts = searchApi.filterProducts(null, null, null, null, null, null, null, null,
+                    "created_at", "DESC", 4, 0);
             // Popular products (by price desc as a proxy for popularity)
-            List<Product> popularProducts = searchApi.filterProducts(null, null, null, null, null, null, null, null, "price", "DESC", 4, 0);
+            List<Product> popularProducts = searchApi.filterProducts(null, null, null, null, null, null, null, null,
+                    "price", "DESC", 4, 0);
 
             // Stats
             JSONObject statsReport = reportApi.getSystemStatistics();
@@ -82,20 +86,11 @@ public class HomeView {
             javafx.application.Platform.runLater(() -> {
                 // Insights
                 insightsRow.getChildren().clear();
-                if (statsReport != null) {
-                    insightsRow.getChildren().addAll(
-                        createStatCard("\uD83D\uDCE6", "Total Products", String.valueOf(statsReport.optInt("totalProducts", 0))),
-                        createStatCard("\u2705", "Available", String.valueOf(statsReport.optInt("availableProducts", 0))),
-                        createStatCard("\uD83D\uDED2", "Sold", String.valueOf(statsReport.optInt("soldProducts", 0)))
-                    );
-                }
-
-                Account account = SessionManager.getInstance().getAccount();
-                if (account != null) {
-                    insightsRow.getChildren().add(
-                        createStatCard("\uD83D\uDCB0", "Your Balance", String.format("$%.2f", account.getBalance()))
-                    );
-                }
+                insightsRow.getChildren().addAll(
+                        createStatCard("\uD83D\uDEE1\uFE0F", "Payments & Data", "100% Secure"),
+                        createStatCard("\u2B50", "Verified Sellers", "Top Rated"),
+                        createStatCard("\uD83D\uDE9A", "Nationwide", "Fast Delivery"),
+                        createStatCard("\uD83C\uDF1F", "Premium Products", "Quality Assured"));
 
                 // Recent products
                 if (recentProducts.isEmpty()) {
@@ -141,7 +136,10 @@ public class HomeView {
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Hyperlink link = new Hyperlink(actionText);
         link.getStyleClass().add("auth-link");
-        link.setOnAction(e -> { if (action != null) action.run(); });
+        link.setOnAction(e -> {
+            if (action != null)
+                action.run();
+        });
         row.getChildren().addAll(header, spacer, link);
 
         // Return just the header label since HBox can't be returned as Label
@@ -179,7 +177,8 @@ public class HomeView {
 
         if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
             try {
-                javafx.scene.image.Image img = new javafx.scene.image.Image(p.getImageUrl(), 220, 120, true, true, true);
+                javafx.scene.image.Image img = new javafx.scene.image.Image(p.getImageUrl(), 220, 120, true, true,
+                        true);
                 javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
                 imgView.setFitWidth(220);
                 imgView.setFitHeight(120);
@@ -210,7 +209,7 @@ public class HomeView {
         brand.getStyleClass().add("product-brand");
 
         Label status = new Label(p.getStatus());
-        status.getStyleClass().addAll("badge", "AVAILABLE".equals(p.getStatus()) ? "badge-available" : "badge-sold");
+        status.getStyleClass().addAll("badge", "IN_STOCK".equals(p.getStatus()) ? "badge-available" : "badge-sold");
 
         info.getChildren().addAll(name, brand, price, status);
         card.getChildren().addAll(imgPlaceholder, info);

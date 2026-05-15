@@ -32,9 +32,22 @@ public class MyShopView {
         title.getStyleClass().add("heading");
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button genReportBtn = new Button("\uD83D\uDCC4 Generate Report");
+        genReportBtn.getStyleClass().addAll("button", "button-outline");
+        genReportBtn.setOnAction(e -> {
+            contentBox.getChildren().clear();
+            contentBox.getChildren().add(header);
+            Label loadingLabel = new Label("Generating fresh analytics...");
+            loadingLabel.getStyleClass().add("subheading");
+            loadingLabel.setStyle("-fx-text-fill: -text-subtle;");
+            contentBox.getChildren().add(loadingLabel);
+            loadDashboard();
+        });
+
         Button manageBtn = new Button("\uD83D\uDCE6 Manage Products");
         manageBtn.setOnAction(e -> layout.navigateTo("myproducts"));
-        header.getChildren().addAll(title, spacer, manageBtn);
+        header.getChildren().addAll(title, spacer, genReportBtn, manageBtn);
 
         contentBox.getChildren().add(header);
 
@@ -75,6 +88,11 @@ public class MyShopView {
 
                 // Recent Sales
                 contentBox.getChildren().add(buildRecentSalesSection(salesReport));
+
+                // Add Chart
+                if (salesReport != null) {
+                    contentBox.getChildren().add(buildChartSection(salesReport));
+                }
 
                 // My Products Preview
                 contentBox.getChildren().add(buildProductPreviewSection(myProducts));
@@ -289,6 +307,39 @@ public class MyShopView {
         return section;
     }
 
+    private VBox buildChartSection(JSONObject salesReport) {
+        VBox section = new VBox(16);
+        Label sectionTitle = new Label("\uD83D\uDCC8 Sales Trend");
+        sectionTitle.getStyleClass().add("subheading");
+
+        javafx.scene.chart.CategoryAxis xAxis = new javafx.scene.chart.CategoryAxis();
+        xAxis.setLabel("Transaction");
+        javafx.scene.chart.NumberAxis yAxis = new javafx.scene.chart.NumberAxis();
+        yAxis.setLabel("Amount ($)");
+
+        javafx.scene.chart.LineChart<String, Number> lineChart = new javafx.scene.chart.LineChart<>(xAxis, yAxis);
+        lineChart.setTitle("Recent Sales Performance");
+        lineChart.setLegendVisible(false);
+
+        javafx.scene.chart.XYChart.Series<String, Number> series = new javafx.scene.chart.XYChart.Series<>();
+
+        JSONArray salesArr = salesReport.optJSONArray("sales");
+        if (salesArr != null) {
+            int displayCount = Math.min(salesArr.length(), 10);
+            for (int i = displayCount - 1; i >= 0; i--) {
+                JSONObject sale = salesArr.getJSONObject(i);
+                series.getData().add(new javafx.scene.chart.XYChart.Data<>("TX #" + sale.optInt("transactionId"), sale.optDouble("amount", 0)));
+            }
+        }
+        lineChart.getData().add(series);
+
+        VBox card = new VBox(lineChart);
+        card.getStyleClass().add("card");
+
+        section.getChildren().addAll(sectionTitle, card);
+        return section;
+    }
+
     private VBox buildProductPreviewSection(List<Product> products) {
         VBox section = new VBox(16);
 
@@ -370,7 +421,7 @@ public class MyShopView {
         price.getStyleClass().add("product-price");
 
         Label status = new Label(p.getStatus());
-        status.getStyleClass().addAll("badge", "AVAILABLE".equals(p.getStatus()) ? "badge-available" : "badge-sold");
+        status.getStyleClass().addAll("badge", "IN_STOCK".equals(p.getStatus()) ? "badge-available" : "badge-sold");
 
         info.getChildren().addAll(name, price, status);
         tile.getChildren().addAll(imgPlaceholder, info);
@@ -382,8 +433,8 @@ public class MyShopView {
         Label badge = new Label(status);
         String cls = "badge-pending";
         if ("COMPLETED".equals(status)) cls = "badge-completed";
-        else if ("AVAILABLE".equals(status)) cls = "badge-available";
-        else if ("SOLD".equals(status)) cls = "badge-sold";
+        else if ("IN_STOCK".equals(status)) cls = "badge-available";
+        else if ("OUT_OF_STOCK".equals(status)) cls = "badge-sold";
         badge.getStyleClass().addAll("badge", cls);
         return badge;
     }

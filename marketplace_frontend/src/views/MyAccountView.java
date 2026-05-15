@@ -99,7 +99,7 @@ public class MyAccountView {
                     double newBal = result.optDouble("newBalance", 0);
                     SessionManager.getInstance().getAccount().setBalance(newBal);
                     balanceAmount.setText(
-                            String.format("$%.2f %s", newBal, account != null ? account.getCurrency() : "EGP"));
+                            String.format("$%.2f", newBal));
                     depositField.clear();
                     AlertHelper.showSuccess("Deposited $" + String.format("%.2f", amount));
                 } else {
@@ -111,7 +111,44 @@ public class MyAccountView {
         });
         depositRow.getChildren().addAll(depositField, depositBtn);
 
-        balanceCard.getChildren().addAll(balanceTitle, balanceAmount, new Separator(), depositLabel, depositRow);
+        Label withdrawLabel = new Label("Withdraw Funds");
+        withdrawLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+
+        HBox withdrawRow = new HBox(8);
+        withdrawRow.setAlignment(Pos.CENTER_LEFT);
+        TextField withdrawField = new TextField();
+        withdrawField.setPromptText("Amount");
+        withdrawField.setPrefWidth(140);
+        Button withdrawBtn = new Button("Withdraw");
+        withdrawBtn.getStyleClass().addAll("button", "button-outline");
+        withdrawBtn.setStyle("-fx-padding: 8 16;");
+        withdrawBtn.setOnAction(e -> {
+            try {
+                double amount = Double.parseDouble(withdrawField.getText().trim());
+                if (amount <= 0) {
+                    AlertHelper.showError("Error", "Amount must be positive.");
+                    return;
+                }
+                int userId = SessionManager.getInstance().getCurrentUser().getUserId();
+                JSONObject result = userApi.withdraw(userId, amount);
+                if (result.optBoolean("success")) {
+                    double newBal = result.optDouble("newBalance", 0);
+                    SessionManager.getInstance().getAccount().setBalance(newBal);
+                    balanceAmount.setText(
+                            String.format("$%.2f", newBal));
+                    withdrawField.clear();
+                    AlertHelper.showSuccess("Withdrew $" + String.format("%.2f", amount));
+                } else {
+                    AlertHelper.showError("Withdrawal Failed", result.optString("error", "Unknown error"));
+                }
+            } catch (NumberFormatException ex) {
+                AlertHelper.showError("Invalid Input", "Enter a valid amount.");
+            }
+        });
+        withdrawRow.getChildren().addAll(withdrawField, withdrawBtn);
+
+        balanceCard.getChildren().addAll(balanceTitle, balanceAmount, new Separator(), depositLabel, depositRow,
+                withdrawLabel, withdrawRow);
 
         // Account Actions card
         VBox actionsCard = new VBox(12);
@@ -172,7 +209,7 @@ public class MyAccountView {
         HBox filterRow = new HBox(12);
         filterRow.setAlignment(Pos.CENTER_LEFT);
         ComboBox<String> typeFilter = new ComboBox<>();
-        typeFilter.getItems().addAll("All Types", "PURCHASE", "DEPOSIT");
+        typeFilter.getItems().addAll("All Types", "PURCHASE", "DEPOSIT", "WITHDRAWAL");
         typeFilter.setValue("All Types");
 
         ComboBox<String> sortCombo = new ComboBox<>();

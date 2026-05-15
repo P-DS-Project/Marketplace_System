@@ -33,9 +33,9 @@ public class ProductApiService {
         JSONObject body = SocketClient.getResponseBody(response);
 
         if (code == 200 || code == 201) {
-            return body.optString("message", "Product added successfully");
+            return body.toString();
         }
-        return "ERROR: " + body; // .optString("error", "Failed to add product");
+        return "ERROR: " + body.optString("error", "Failed to add product");
     }
 
     public List<Product> getProductsBySeller(int sellerId) {
