@@ -29,7 +29,7 @@ public class ChatView {
         VBox leftPanel = new VBox(0);
         leftPanel.setPrefWidth(300);
         leftPanel.setMinWidth(300);
-        leftPanel.setStyle("-fx-border-color: #E2E8F0; -fx-border-width: 0 1 0 0;");
+        leftPanel.setStyle("-fx-border-color: -border-color; -fx-border-width: 0 1 0 0;");
 
         Label chatTitle = new Label("\uD83D\uDCAC Messages");
         chatTitle.getStyleClass().add("subheading");
@@ -61,7 +61,7 @@ public class ChatView {
         HBox chatHeader = new HBox(12);
         chatHeader.setPadding(new Insets(16));
         chatHeader.setAlignment(Pos.CENTER_LEFT);
-        chatHeader.setStyle("-fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0;");
+        chatHeader.setStyle("-fx-border-color: -border-color; -fx-border-width: 0 0 1 0;");
         headerTitle = new Label("Select a conversation");
         headerTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 16px;");
         chatHeader.getChildren().add(headerTitle);
@@ -75,14 +75,14 @@ public class ChatView {
         VBox.setVgrow(msgScroll, Priority.ALWAYS);
 
         Label placeholder = new Label("\uD83D\uDCAC Select or start a conversation to begin chatting");
-        placeholder.setStyle("-fx-text-fill: #64748B; -fx-font-size: 14px; -fx-padding: 40;");
+        placeholder.setStyle("-fx-text-fill: -text-subtle; -fx-font-size: 14px; -fx-padding: 40;");
         messageArea.getChildren().add(placeholder);
 
         // Input bar
         HBox inputBar = new HBox(12);
         inputBar.setPadding(new Insets(12, 16, 12, 16));
         inputBar.setAlignment(Pos.CENTER);
-        inputBar.setStyle("-fx-border-color: #E2E8F0; -fx-border-width: 1 0 0 0;");
+        inputBar.setStyle("-fx-border-color: -border-color; -fx-border-width: 1 0 0 0;");
 
         messageInput = new TextField();
         messageInput.getStyleClass().add("chat-input");
@@ -230,7 +230,7 @@ public class ChatView {
                 messageArea.getChildren().clear();
                 if (messages.isEmpty()) {
                     Label empty = new Label("No messages yet. Start the conversation!");
-                    empty.setStyle("-fx-text-fill: #64748B;");
+                    empty.setStyle("-fx-text-fill: -text-subtle;");
                     messageArea.getChildren().add(empty);
                 } else {
                     for (ChatMessage msg : messages) {
@@ -245,7 +245,7 @@ public class ChatView {
                             msgLabel.setStyle(msgLabel.getStyle() + "-fx-text-fill: white;");
 
                         Label timeLabel = new Label(msg.getTimestamp() != null ? msg.getTimestamp() : "");
-                        timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #94A3B8;");
+                        timeLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: -text-subtle;");
 
                         bubble.getChildren().addAll(msgLabel, timeLabel);
                         bubble.setAlignment(isMine ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);

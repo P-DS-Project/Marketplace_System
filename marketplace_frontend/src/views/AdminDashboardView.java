@@ -54,10 +54,10 @@ public class AdminDashboardView {
 
         row.getChildren().addAll(
             createStatCard("\uD83D\uDC65", "Total Users", String.valueOf(totalUsers), "-primary"),
-            createStatCard("\uD83D\uDEE1\uFE0F", "Admins", String.valueOf(totalAdmins), "#8B5CF6"),
+            createStatCard("\uD83D\uDEE1\uFE0F", "Admins", String.valueOf(totalAdmins), "-secondary"),
             createStatCard("\uD83D\uDCE6", "Products", String.valueOf(totalProducts), "-accent"),
             createStatCard("\uD83D\uDCB3", "Transactions", String.valueOf(totalTx), "-success"),
-            createStatCard("\uD83D\uDCB0", "Revenue", String.format("EGP %.0f", totalRevenue), "#F59E0B")
+            createStatCard("\uD83D\uDCB0", "Revenue", String.format("EGP %.0f", totalRevenue), "-warning")
         );
 
         for (var child : row.getChildren()) {
@@ -154,7 +154,7 @@ public class AdminDashboardView {
             switch (tx.optString("status", "")) {
                 case "COMPLETED": statusLabel.getStyleClass().add("badge-completed"); break;
                 case "PENDING": statusLabel.getStyleClass().add("badge-pending"); break;
-                default: statusLabel.setStyle("-fx-background-color: -danger-bg; -fx-text-fill: #991B1B;"); break;
+                default: statusLabel.setStyle("-fx-background-color: -danger-bg; -fx-text-fill: -danger;"); break;
             }
 
             Label amountLabel = new Label(String.format("EGP %.2f", tx.optDouble("amount", 0)));

@@ -70,9 +70,9 @@ public class AdminTransactionsView {
         row.getChildren().addAll(
             miniStatCard("Total", String.valueOf(total), "-primary"),
             miniStatCard("Completed", String.valueOf(completed), "-success"),
-            miniStatCard("Pending", String.valueOf(pending), "#F59E0B"),
+            miniStatCard("Pending", String.valueOf(pending), "-warning"),
             miniStatCard("Failed", String.valueOf(failed), "-danger"),
-            miniStatCard("Refunded", String.valueOf(refunded), "#8B5CF6"),
+            miniStatCard("Refunded", String.valueOf(refunded), "-accent"),
             miniStatCard("Revenue", String.format("EGP %.0f", revenue), "-success")
         );
 
@@ -126,7 +126,7 @@ public class AdminTransactionsView {
                 b.getStyleClass().add("badge");
                 if ("PURCHASE".equals(item)) b.getStyleClass().add("badge-available");
                 else if ("DEPOSIT".equals(item)) b.getStyleClass().add("badge-pending");
-                else b.setStyle("-fx-background-color: #E2E8F0; -fx-text-fill: #475569; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;");
+                else b.setStyle("-fx-background-color: -bg-secondary; -fx-text-fill: -text-secondary; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;");
                 setGraphic(b); setText(null);
             }
         });
@@ -143,8 +143,8 @@ public class AdminTransactionsView {
                 switch (item) {
                     case "COMPLETED": b.getStyleClass().add("badge-completed"); break;
                     case "PENDING": b.getStyleClass().add("badge-pending"); break;
-                    case "FAILED": b.setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;"); break;
-                    case "REFUNDED": b.setStyle("-fx-background-color: #EDE9FE; -fx-text-fill: #6D28D9; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;"); break;
+                    case "FAILED": b.setStyle("-fx-background-color: -danger-bg; -fx-text-fill: -danger; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;"); break;
+                    case "REFUNDED": b.setStyle("-fx-background-color: -primary-light; -fx-text-fill: -primary; -fx-padding: 4 12; -fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;"); break;
                     default: break;
                 }
                 setGraphic(b); setText(null);

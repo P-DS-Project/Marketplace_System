@@ -1,10 +1,17 @@
 package views;
 
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
 import models.Product;
+import org.json.JSONObject;
 import services.SearchApiService;
+import services.CartApiService;
+import state.SessionManager;
+import utils.AlertHelper;
 import java.util.List;
 
 public class BrowseView {
@@ -12,6 +19,7 @@ public class BrowseView {
     private final ScrollPane root;
     private final MainLayout layout;
     private final SearchApiService searchApi = new SearchApiService();
+    private final CartApiService cartApi = new CartApiService();
     private FlowPane productGrid;
     private int selectedCategory = -1;
     private String sortBy = "created_at";
@@ -23,6 +31,8 @@ public class BrowseView {
     private Double minPrice = null;
     private Double maxPrice = null;
     private Label pageLabel;
+    private Button prevBtn;
+    private Button nextBtn;
 
     public BrowseView(MainLayout layout) {
         this.layout = layout;
@@ -165,12 +175,12 @@ public class BrowseView {
         // Pagination
         HBox pagination = new HBox(12);
         pagination.setAlignment(Pos.CENTER);
-        Button prevBtn = new Button("\u25C0 Previous");
+        prevBtn = new Button("\u25C0 Previous");
         prevBtn.getStyleClass().addAll("button", "button-secondary");
         prevBtn.setOnAction(e -> { if (currentPage > 0) { currentPage--; loadProducts(); } });
         pageLabel = new Label("Page " + (currentPage + 1));
         pageLabel.setStyle("-fx-font-weight: bold;");
-        Button nextBtn = new Button("Next \u25B6");
+        nextBtn = new Button("Next \u25B6");
         nextBtn.getStyleClass().addAll("button", "button-secondary");
         nextBtn.setOnAction(e -> { currentPage++; loadProducts(); });
         pagination.getChildren().addAll(prevBtn, pageLabel, nextBtn);
@@ -191,19 +201,48 @@ public class BrowseView {
             Integer catId = selectedCategory > 0 ? selectedCategory : null;
             List<Product> products = searchApi.filterProducts(
                 searchQuery, catId, minPrice, maxPrice, brandFilter,
-                null, null, null, sortBy, sortOrder, PAGE_SIZE, currentPage * PAGE_SIZE
+                null, null, null, sortBy, sortOrder, PAGE_SIZE + 1, currentPage * PAGE_SIZE
             );
             javafx.application.Platform.runLater(() -> {
                 productGrid.getChildren().clear();
-                if (products.isEmpty()) {
+                boolean hasNext = products.size() > PAGE_SIZE;
+                List<Product> displayList = hasNext ? products.subList(0, PAGE_SIZE) : products;
+
+                if (displayList.isEmpty()) {
+                    VBox emptyState = new VBox(8);
+                    emptyState.setAlignment(Pos.CENTER);
+                    emptyState.setPadding(new Insets(40));
+                    Label emptyIcon = new Label("📦");
+                    emptyIcon.setStyle("-fx-font-size: 40px;");
                     Label empty = new Label("No products found matching your criteria.");
-                    empty.setStyle("-fx-text-fill: #64748B; -fx-font-size: 14px; -fx-padding: 40;");
-                    productGrid.getChildren().add(empty);
+                    empty.setStyle("-fx-text-fill: -text-subtle; -fx-font-size: 14px;");
+                    emptyState.getChildren().addAll(emptyIcon, empty);
+                    productGrid.getChildren().add(emptyState);
                 } else {
-                    for (Product p : products) {
-                        productGrid.getChildren().add(createProductCard(p));
+                    for (int i = 0; i < displayList.size(); i++) {
+                        Product p = displayList.get(i);
+                        VBox card = createProductCard(p);
+                        card.setOpacity(0);
+                        card.setTranslateY(16);
+                        productGrid.getChildren().add(card);
+
+                        final int delay = i * 50;
+                        javafx.application.Platform.runLater(() -> {
+                            FadeTransition fade = new FadeTransition(Duration.millis(350), card);
+                            fade.setDelay(Duration.millis(delay));
+                            fade.setFromValue(0);
+                            fade.setToValue(1);
+                            TranslateTransition slide = new TranslateTransition(Duration.millis(350), card);
+                            slide.setDelay(Duration.millis(delay));
+                            slide.setFromY(16);
+                            slide.setToY(0);
+                            fade.play();
+                            slide.play();
+                        });
                     }
                 }
+                prevBtn.setDisable(currentPage == 0);
+                nextBtn.setDisable(!hasNext);
             });
         }).start();
     }
@@ -211,33 +250,34 @@ public class BrowseView {
     private VBox createProductCard(Product p) {
         VBox card = new VBox(0);
         card.getStyleClass().add("product-card");
-        card.setPrefWidth(220);
+        card.setPrefWidth(230);
 
         StackPane imgPlaceholder = new StackPane();
         imgPlaceholder.getStyleClass().add("product-image-placeholder");
-        imgPlaceholder.setPrefHeight(120);
+        imgPlaceholder.setPrefHeight(160);
+        imgPlaceholder.setMinHeight(160);
 
         if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
             try {
-                javafx.scene.image.Image img = new javafx.scene.image.Image(p.getImageUrl(), 220, 120, true, true, true);
+                javafx.scene.image.Image img = new javafx.scene.image.Image(p.getImageUrl(), 230, 160, true, true, true);
                 javafx.scene.image.ImageView imgView = new javafx.scene.image.ImageView(img);
-                imgView.setFitWidth(220);
-                imgView.setFitHeight(120);
+                imgView.setFitWidth(230);
+                imgView.setFitHeight(160);
                 imgView.setPreserveRatio(true);
                 imgPlaceholder.getChildren().add(imgView);
             } catch (Exception e) {
-                Label imgIcon = new Label("\uD83D\uDCE6");
-                imgIcon.setStyle("-fx-font-size: 36px;");
+                Label imgIcon = new Label("🖼️");
+                imgIcon.setStyle("-fx-font-size: 44px;");
                 imgPlaceholder.getChildren().add(imgIcon);
             }
         } else {
-            Label imgIcon = new Label("\uD83D\uDCE6");
-            imgIcon.setStyle("-fx-font-size: 36px;");
+            Label imgIcon = new Label("🖼️");
+            imgIcon.setStyle("-fx-font-size: 44px;");
             imgPlaceholder.getChildren().add(imgIcon);
         }
 
-        VBox info = new VBox(6);
-        info.setPadding(new Insets(12));
+        VBox info = new VBox(8);
+        info.setPadding(new Insets(14));
 
         Label name = new Label(p.getName());
         name.getStyleClass().add("product-name");
@@ -249,10 +289,42 @@ public class BrowseView {
         Label brand = new Label(p.getBrand() != null && !p.getBrand().isEmpty() ? p.getBrand() : "No brand");
         brand.getStyleClass().add("product-brand");
 
-        Label status = new Label(p.getStatus());
-        status.getStyleClass().addAll("badge", "IN_STOCK".equals(p.getStatus()) ? "badge-available" : "badge-sold");
+        // Bottom row: status badge + add to cart button
+        HBox bottomRow = new HBox(8);
+        bottomRow.setAlignment(Pos.CENTER_LEFT);
 
-        info.getChildren().addAll(name, brand, price, status);
+        boolean isAvailable = "IN_STOCK".equals(p.getStatus()) || "AVAILABLE".equals(p.getStatus());
+        Label status = new Label(p.getStatus());
+        status.getStyleClass().addAll("badge", isAvailable ? "badge-available" : "badge-sold");
+
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        Button addToCartBtn = new Button("🛒");
+        addToCartBtn.getStyleClass().addAll("button", "button-success");
+        addToCartBtn.setStyle("-fx-padding: 6 12; -fx-font-size: 12px;");
+        addToCartBtn.setDisable(!isAvailable);
+        addToCartBtn.setOnAction(e -> {
+            e.consume();
+            int userId = SessionManager.getInstance().getCurrentUser() != null
+                    ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
+            if (userId == -1) { AlertHelper.showError("Not logged in", "Please log in first."); return; }
+            new Thread(() -> {
+                JSONObject result = cartApi.addToCart(userId, p.getProductId(), 1);
+                javafx.application.Platform.runLater(() -> {
+                    if (result != null && result.optBoolean("success")) {
+                        AlertHelper.showSuccess(p.getName() + " added to cart!");
+                    } else {
+                        String err = result != null ? result.optString("error", "Failed") : "Failed to add to cart.";
+                        AlertHelper.showError("Cart Error", err);
+                    }
+                });
+            }).start();
+        });
+
+        bottomRow.getChildren().addAll(status, spacer, addToCartBtn);
+
+        info.getChildren().addAll(name, brand, price, bottomRow);
         card.getChildren().addAll(imgPlaceholder, info);
 
         card.setOnMouseClicked(e -> layout.showProductDetail(p.getProductId()));

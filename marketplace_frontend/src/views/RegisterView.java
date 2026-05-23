@@ -3,17 +3,36 @@ package views;
 import javafx.geometry.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+import javafx.util.Duration;
 import services.UserApiService;
 
 public class RegisterView {
 
     private final StackPane root;
     private final UserApiService userApi = new UserApiService();
+    private boolean navigating = false;
 
     public RegisterView() {
         root = new StackPane();
         root.getStyleClass().add("auth-container");
-        root.getChildren().add(buildCard());
+
+        VBox card = buildCard();
+        card.setOpacity(0);
+        card.setTranslateY(30);
+        root.getChildren().add(card);
+
+        javafx.application.Platform.runLater(() -> {
+            FadeTransition fade = new FadeTransition(Duration.millis(600), card);
+            fade.setFromValue(0);
+            fade.setToValue(1);
+            TranslateTransition slide = new TranslateTransition(Duration.millis(600), card);
+            slide.setFromY(30);
+            slide.setToY(0);
+            fade.play();
+            slide.play();
+        });
     }
 
     private VBox buildCard() {
@@ -43,14 +62,17 @@ public class RegisterView {
 
         nameField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                String name = nameField.getText().trim();
-                if (name.isEmpty()) {
-                    showFieldError(nameField, nameError, "Username is required");
-                } else if (name.length() < 3) {
-                    showFieldError(nameField, nameError, "Username must be at least 3 characters");
-                } else {
-                    clearFieldError(nameField, nameError);
-                }
+                javafx.application.Platform.runLater(() -> {
+                    if (navigating) return;
+                    String name = nameField.getText().trim();
+                    if (name.isEmpty()) {
+                        showFieldError(nameField, nameError, "Username is required");
+                    } else if (name.length() < 3) {
+                        showFieldError(nameField, nameError, "Username must be at least 3 characters");
+                    } else {
+                        clearFieldError(nameField, nameError);
+                    }
+                });
             }
         });
 
@@ -66,14 +88,17 @@ public class RegisterView {
 
         emailField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                String email = emailField.getText().trim();
-                if (email.isEmpty()) {
-                    showFieldError(emailField, emailError, "Email is required");
-                } else if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                    showFieldError(emailField, emailError, "Enter a valid email address");
-                } else {
-                    clearFieldError(emailField, emailError);
-                }
+                javafx.application.Platform.runLater(() -> {
+                    if (navigating) return;
+                    String email = emailField.getText().trim();
+                    if (email.isEmpty()) {
+                        showFieldError(emailField, emailError, "Email is required");
+                    } else if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                        showFieldError(emailField, emailError, "Enter a valid email address");
+                    } else {
+                        clearFieldError(emailField, emailError);
+                    }
+                });
             }
         });
 
@@ -89,7 +114,10 @@ public class RegisterView {
 
         passField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                validatePassword(passField, passError);
+                javafx.application.Platform.runLater(() -> {
+                    if (navigating) return;
+                    validatePassword(passField, passError);
+                });
             }
         });
 
@@ -105,15 +133,18 @@ public class RegisterView {
 
         confirmField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                String confirm = confirmField.getText();
-                String pass = passField.getText();
-                if (confirm.isEmpty()) {
-                    showFieldError(confirmField, confirmError, "Please confirm your password");
-                } else if (!confirm.equals(pass)) {
-                    showFieldError(confirmField, confirmError, "Passwords do not match");
-                } else {
-                    clearFieldError(confirmField, confirmError);
-                }
+                javafx.application.Platform.runLater(() -> {
+                    if (navigating) return;
+                    String confirm = confirmField.getText();
+                    String pass = passField.getText();
+                    if (confirm.isEmpty()) {
+                        showFieldError(confirmField, confirmError, "Please confirm your password");
+                    } else if (!confirm.equals(pass)) {
+                        showFieldError(confirmField, confirmError, "Passwords do not match");
+                    } else {
+                        clearFieldError(confirmField, confirmError);
+                    }
+                });
             }
         });
 
@@ -143,7 +174,10 @@ public class RegisterView {
         hasAccLabel.getStyleClass().add("auth-subtitle");
         Hyperlink loginLink = new Hyperlink("Sign in");
         loginLink.getStyleClass().add("auth-link");
-        loginLink.setOnAction(e -> showLogin());
+        loginLink.setOnMousePressed(e -> {
+            navigating = true;
+            showLogin();
+        });
         loginBox.getChildren().addAll(hasAccLabel, loginLink);
 
         card.getChildren().addAll(logo, subtitle, spacer,
@@ -215,9 +249,8 @@ public class RegisterView {
 
         String result = userApi.register(username, email, password, "USER");
         if (result != null && !result.startsWith("ERROR")) {
-            successLabel.setText("\u2705 Account created! You can now sign in.");
-            successLabel.setVisible(true);
-            successLabel.setManaged(true);
+            navigating = true;
+            showLogin();
         } else {
             generalError.setText(result != null ? result.replace("ERROR: ", "") : "Registration failed. Please try again.");
             generalError.setVisible(true);
@@ -265,7 +298,21 @@ public class RegisterView {
 
     private void showLogin() {
         LoginView loginView = new LoginView();
-        root.getScene().setRoot(loginView.getRoot());
+        javafx.scene.Parent loginRoot = loginView.getRoot();
+        loginRoot.setOpacity(0.8);
+        loginRoot.setTranslateY(5);
+        root.getScene().setRoot(loginRoot);
+        
+        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(Duration.millis(300), loginRoot);
+        fade.setToValue(1.0);
+        fade.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        
+        javafx.animation.TranslateTransition slide = new javafx.animation.TranslateTransition(Duration.millis(300), loginRoot);
+        slide.setToY(0);
+        slide.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        
+        javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fade, slide);
+        pt.play();
     }
 
     public StackPane getRoot() {

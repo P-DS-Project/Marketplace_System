@@ -61,7 +61,7 @@ public class CartView {
         // Balance info
         double balance = SessionManager.getInstance().getAccount() != null ? SessionManager.getInstance().getAccount().getBalance() : 0;
         balanceLabel = new Label(String.format("Your Balance: $%.2f", balance));
-        balanceLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #10B981; -fx-font-weight: bold;");
+        balanceLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: -success; -fx-font-weight: bold;");
 
         // Deposit section
         Label depositTitle = new Label("Deposit to Balance");
@@ -127,7 +127,7 @@ public class CartView {
                     Label emptyText = new Label("Your cart is empty");
                     emptyText.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
                     Label emptySub = new Label("Browse products and add items to your cart");
-                    emptySub.setStyle("-fx-text-fill: #64748B;");
+                    emptySub.setStyle("-fx-text-fill: -text-subtle;");
                     Button browseBtn = new Button("Browse Products");
                     browseBtn.setOnAction(e -> layout.navigateTo("browse"));
                     emptyState.getChildren().addAll(emptyIcon, emptyText, emptySub, browseBtn);
@@ -167,7 +167,7 @@ public class CartView {
         Label name = new Label(item.getProductName());
         name.setStyle("-fx-font-weight: bold; -fx-font-size: 15px;");
         Label price = new Label(String.format("$%.2f each", item.getUnitPrice()));
-        price.setStyle("-fx-text-fill: #64748B; -fx-font-size: 13px;");
+        price.setStyle("-fx-text-fill: -text-subtle; -fx-font-size: 13px;");
         info.getChildren().addAll(name, price);
 
         // Quantity controls
@@ -206,7 +206,7 @@ public class CartView {
         // Remove button
         Button removeBtn = new Button("\u2716");
         removeBtn.getStyleClass().addAll("button", "button-icon");
-        removeBtn.setStyle("-fx-text-fill: #EF4444; -fx-font-size: 14px;");
+        removeBtn.setStyle("-fx-text-fill: -danger; -fx-font-size: 14px;");
         removeBtn.setOnAction(e -> {
             cartApi.removeFromCart(item.getCartItemId());
             loadCart();

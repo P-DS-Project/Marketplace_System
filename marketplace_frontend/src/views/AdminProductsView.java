@@ -94,8 +94,8 @@ public class AdminProductsView {
                 setText(item);
                 try {
                     int qty = Integer.parseInt(item);
-                    if (qty == 0) setStyle("-fx-text-fill: #EF4444; -fx-font-weight: bold;");
-                    else if (qty < 10) setStyle("-fx-text-fill: #F59E0B; -fx-font-weight: bold;");
+                    if (qty == 0) setStyle("-fx-text-fill: -danger; -fx-font-weight: bold;");
+                    else if (qty < 10) setStyle("-fx-text-fill: -warning; -fx-font-weight: bold;");
                     else setStyle("-fx-font-weight: bold;");
                 } catch (NumberFormatException e) { setStyle(""); }
             }
@@ -116,10 +116,10 @@ public class AdminProductsView {
                 box.setAlignment(Pos.CENTER);
                 int pid = Integer.parseInt(row.getProductId());
                 Button viewBtn = new Button("View");
-                viewBtn.setStyle("-fx-background-color: #DBEAFE; -fx-text-fill: #1E40AF; -fx-background-radius: 6; -fx-padding: 4 10; -fx-font-size: 11px; -fx-cursor: hand; -fx-font-weight: bold;");
+                viewBtn.setStyle("-fx-background-color: -primary-light; -fx-text-fill: -primary; -fx-background-radius: 6; -fx-padding: 4 10; -fx-font-size: 11px; -fx-cursor: hand; -fx-font-weight: bold;");
                 viewBtn.setOnAction(e -> mainLayout.showProductDetail(pid));
                 Button deleteBtn = new Button("Delete");
-                deleteBtn.setStyle("-fx-background-color: #FEE2E2; -fx-text-fill: #991B1B; -fx-background-radius: 6; -fx-padding: 4 10; -fx-font-size: 11px; -fx-cursor: hand; -fx-font-weight: bold;");
+                deleteBtn.setStyle("-fx-background-color: -danger-bg; -fx-text-fill: -danger; -fx-background-radius: 6; -fx-padding: 4 10; -fx-font-size: 11px; -fx-cursor: hand; -fx-font-weight: bold;");
                 deleteBtn.setOnAction(e -> deleteProduct(pid, row.getName()));
                 box.getChildren().addAll(viewBtn, deleteBtn);
                 setGraphic(box);
