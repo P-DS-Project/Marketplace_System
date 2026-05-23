@@ -11,7 +11,7 @@ public class DatabaseConnectionManager {
     private static final String NODE3_URL = "jdbc:postgresql://localhost:5432/marketplace_node3";
 
     private static final String USERNAME = "postgres";
-    private static final String PASSWORD = "postgres";
+    private static final String PASSWORD = "123456789";
 
     static {
         try {

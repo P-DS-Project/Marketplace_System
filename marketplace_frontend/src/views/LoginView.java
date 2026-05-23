@@ -4,6 +4,9 @@ import javafx.geometry.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.text.TextAlignment;
+import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
+import javafx.util.Duration;
 import services.UserApiService;
 import state.SessionManager;
 import models.User;
@@ -14,11 +17,29 @@ public class LoginView {
 
     private final StackPane root;
     private final UserApiService userApi = new UserApiService();
+    private boolean navigating = false;
 
     public LoginView() {
         root = new StackPane();
         root.getStyleClass().add("auth-container");
-        root.getChildren().add(buildCard());
+
+        VBox card = buildCard();
+
+        // Entrance animation — matches example style
+        card.setOpacity(0);
+        card.setTranslateY(30);
+        root.getChildren().add(card);
+
+        javafx.application.Platform.runLater(() -> {
+            FadeTransition fade = new FadeTransition(Duration.millis(600), card);
+            fade.setFromValue(0);
+            fade.setToValue(1);
+            TranslateTransition slide = new TranslateTransition(Duration.millis(600), card);
+            slide.setFromY(30);
+            slide.setToY(0);
+            fade.play();
+            slide.play();
+        });
     }
 
     private VBox buildCard() {
@@ -50,14 +71,17 @@ public class LoginView {
 
         emailField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                String email = emailField.getText().trim();
-                if (email.isEmpty()) {
-                    showFieldError(emailField, emailError, "Email is required");
-                } else if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                    showFieldError(emailField, emailError, "Enter a valid email address");
-                } else {
-                    clearFieldError(emailField, emailError);
-                }
+                javafx.application.Platform.runLater(() -> {
+                    if (navigating) return;
+                    String email = emailField.getText().trim();
+                    if (email.isEmpty()) {
+                        showFieldError(emailField, emailError, "Email is required");
+                    } else if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                        showFieldError(emailField, emailError, "Enter a valid email address");
+                    } else {
+                        clearFieldError(emailField, emailError);
+                    }
+                });
             }
         });
 
@@ -74,14 +98,17 @@ public class LoginView {
 
         passField.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
             if (!isFocused) {
-                String pass = passField.getText();
-                if (pass.isEmpty()) {
-                    showFieldError(passField, passError, "Password is required");
-                } else if (pass.length() < 8) {
-                    showFieldError(passField, passError, "Password must be at least 8 characters");
-                } else {
-                    clearFieldError(passField, passError);
-                }
+                javafx.application.Platform.runLater(() -> {
+                    if (navigating) return;
+                    String pass = passField.getText();
+                    if (pass.isEmpty()) {
+                        showFieldError(passField, passError, "Password is required");
+                    } else if (pass.length() < 8) {
+                        showFieldError(passField, passError, "Password must be at least 8 characters");
+                    } else {
+                        clearFieldError(passField, passError);
+                    }
+                });
             }
         });
 
@@ -108,7 +135,10 @@ public class LoginView {
         noAccLabel.getStyleClass().add("auth-subtitle");
         Hyperlink regLink = new Hyperlink("Create one");
         regLink.getStyleClass().add("auth-link");
-        regLink.setOnAction(e -> showRegister());
+        regLink.setOnMousePressed(e -> {
+            navigating = true;
+            showRegister();
+        });
         registerBox.getChildren().addAll(noAccLabel, regLink);
 
         card.getChildren().addAll(logo, subtitle, spacer,
@@ -197,7 +227,21 @@ public class LoginView {
 
     private void showRegister() {
         RegisterView regView = new RegisterView();
-        root.getScene().setRoot(regView.getRoot());
+        javafx.scene.Parent regRoot = regView.getRoot();
+        regRoot.setOpacity(0.8);
+        regRoot.setTranslateY(5);
+        root.getScene().setRoot(regRoot);
+        
+        javafx.animation.FadeTransition fade = new javafx.animation.FadeTransition(Duration.millis(300), regRoot);
+        fade.setToValue(1.0);
+        fade.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        
+        javafx.animation.TranslateTransition slide = new javafx.animation.TranslateTransition(Duration.millis(300), regRoot);
+        slide.setToY(0);
+        slide.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        
+        javafx.animation.ParallelTransition pt = new javafx.animation.ParallelTransition(fade, slide);
+        pt.play();
     }
 
     public StackPane getRoot() {

@@ -81,7 +81,8 @@ public class SellerDashboardView {
         // Image placeholder
         StackPane imgPlaceholder = new StackPane();
         imgPlaceholder.getStyleClass().add("product-image-placeholder");
-        imgPlaceholder.setPrefHeight(140);
+        imgPlaceholder.setPrefHeight(160);
+        imgPlaceholder.setMinHeight(160);
 
         if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
             try {
@@ -129,7 +130,7 @@ public class SellerDashboardView {
         HBox stockRow = new HBox(8);
         stockRow.setAlignment(Pos.CENTER_LEFT);
         Label stockLabel = new Label("Stock: ...");
-        stockLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #64748B;");
+        stockLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: -text-subtle;");
         Button decBtn = new Button("-");
         decBtn.setStyle("-fx-padding: 2 6;");
         Button incBtn = new Button("+");

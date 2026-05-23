@@ -70,8 +70,6 @@ public class MyShopView {
 
         new Thread(() -> {
             JSONObject salesReport = reportApi.getSalesReport(userId);
-            JSONObject inventoryReport = reportApi.getInventoryReport();
-            JSONObject systemStats = reportApi.getSystemStatistics();
             List<Product> myProducts = productApi.getProductsBySeller(userId);
 
             javafx.application.Platform.runLater(() -> {
@@ -83,8 +81,8 @@ public class MyShopView {
                 // Sales Analytics Cards
                 contentBox.getChildren().add(buildSalesSection(salesReport));
 
-                // Inventory Summary
-                contentBox.getChildren().add(buildInventorySection(inventoryReport));
+                // My Inventory Summary (based on seller's own products)
+                contentBox.getChildren().add(buildInventorySection(myProducts));
 
                 // Recent Sales
                 contentBox.getChildren().add(buildRecentSalesSection(salesReport));
@@ -155,65 +153,71 @@ public class MyShopView {
         return card;
     }
 
-    private VBox buildInventorySection(JSONObject inventoryReport) {
+    private VBox buildInventorySection(List<Product> myProducts) {
         VBox section = new VBox(16);
 
-        Label sectionTitle = new Label("\uD83D\uDCE6 Inventory Summary");
+        Label sectionTitle = new Label("\uD83D\uDCE6 My Inventory");
         sectionTitle.getStyleClass().add("subheading");
 
-        VBox card = new VBox(12);
+        VBox card = new VBox(16);
         card.getStyleClass().add("card");
 
-        int totalProducts = 0;
+        int totalProducts = myProducts != null ? myProducts.size() : 0;
         int inStock = 0;
         int outOfStock = 0;
+        java.util.List<Product> outOfStockProducts = new java.util.ArrayList<>();
 
-        if (inventoryReport != null) {
-            totalProducts = inventoryReport.optInt("totalProducts", 0);
-            inStock = inventoryReport.optInt("inStockCount", 0);
-            outOfStock = inventoryReport.optInt("outOfStockCount", 0);
+        if (myProducts != null) {
+            for (Product p : myProducts) {
+                if ("IN_STOCK".equals(p.getStatus())) {
+                    inStock++;
+                } else {
+                    outOfStock++;
+                    outOfStockProducts.add(p);
+                }
+            }
         }
 
-        HBox invRow = new HBox(24);
+        HBox invRow = new HBox(32);
         invRow.setAlignment(Pos.CENTER_LEFT);
-
         invRow.getChildren().addAll(
-            createMiniStat("Total Products", String.valueOf(totalProducts)),
+            createMiniStat("My Listings", String.valueOf(totalProducts)),
             createMiniStat("In Stock", String.valueOf(inStock)),
             createMiniStat("Out of Stock", String.valueOf(outOfStock))
         );
-
         card.getChildren().add(invRow);
 
-        // Low stock alerts
-        if (inventoryReport != null) {
-            JSONArray invArr = inventoryReport.optJSONArray("inventory");
-            if (invArr != null) {
-                VBox alertsBox = new VBox(6);
-                boolean hasLowStock = false;
-                for (int i = 0; i < invArr.length(); i++) {
-                    JSONObject item = invArr.getJSONObject(i);
-                    int qty = item.optInt("quantity", 0);
-                    if (qty > 0 && qty <= 5) {
-                        hasLowStock = true;
-                        HBox alertRow = new HBox(8);
-                        alertRow.setAlignment(Pos.CENTER_LEFT);
-                        Label warn = new Label("\u26A0\uFE0F");
-                        warn.setStyle("-fx-font-size: 14px;");
-                        Label productName = new Label(item.optString("productName", "Unknown"));
-                        productName.setStyle("-fx-font-weight: bold;");
-                        Label stockInfo = new Label("Only " + qty + " left in stock");
-                        stockInfo.setStyle("-fx-text-fill: -warning;");
-                        alertRow.getChildren().addAll(warn, productName, stockInfo);
-                        alertsBox.getChildren().add(alertRow);
-                    }
-                }
-                if (hasLowStock) {
-                    Label alertTitle = new Label("\u26A0\uFE0F Low Stock Alerts");
-                    alertTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: -warning; -fx-font-size: 14px;");
-                    card.getChildren().addAll(new Separator(), alertTitle, alertsBox);
-                }
+        // Out-of-stock product alerts
+        if (!outOfStockProducts.isEmpty()) {
+            Separator sep = new Separator();
+            Label alertTitle = new Label("\u26A0\uFE0F  Needs Restocking");
+            alertTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: -warning; -fx-font-size: 14px;");
+
+            VBox alertsBox = new VBox(8);
+            for (Product p : outOfStockProducts) {
+                HBox alertRow = new HBox(10);
+                alertRow.setAlignment(Pos.CENTER_LEFT);
+                alertRow.setStyle("-fx-background-color: -danger-bg; -fx-background-radius: 8; -fx-padding: 8 12;");
+                Label warn = new Label("\uD83D\uDEAB");
+                warn.setStyle("-fx-font-size: 14px;");
+                Label productName = new Label(p.getName());
+                productName.setStyle("-fx-font-weight: bold;");
+                Region spacer2 = new Region();
+                HBox.setHgrow(spacer2, Priority.ALWAYS);
+                Label stockInfo = new Label("Out of Stock");
+                stockInfo.setStyle("-fx-text-fill: -danger; -fx-font-weight: bold;");
+                alertRow.getChildren().addAll(warn, productName, spacer2, stockInfo);
+                alertsBox.getChildren().add(alertRow);
             }
+            card.getChildren().addAll(sep, alertTitle, alertsBox);
+        } else if (totalProducts > 0) {
+            Label allGood = new Label("\u2705  All your products are currently in stock!");
+            allGood.setStyle("-fx-text-fill: -success; -fx-font-size: 13px;");
+            card.getChildren().add(allGood);
+        } else {
+            Label noProducts = new Label("You haven't listed any products yet.");
+            noProducts.setStyle("-fx-text-fill: -text-subtle; -fx-font-size: 13px;");
+            card.getChildren().add(noProducts);
         }
 
         section.getChildren().addAll(sectionTitle, card);

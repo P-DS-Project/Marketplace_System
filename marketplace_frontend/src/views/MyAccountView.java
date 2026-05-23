@@ -48,7 +48,7 @@ public class MyAccountView {
         avatarHolder.setPrefSize(80, 80);
         avatarHolder.setMaxSize(80, 80);
         avatarHolder.setStyle(
-                "-fx-background-color: linear-gradient(to bottom right, #DBEAFE, #E0E7FF); -fx-background-radius: 40;");
+                "-fx-background-color: linear-gradient(to bottom right, -primary-light, -bg-secondary); -fx-background-radius: 40;");
         Label avatarIcon = new Label("\uD83D\uDC64");
         avatarIcon.setStyle("-fx-font-size: 36px;");
         avatarHolder.getChildren().add(avatarIcon);
@@ -57,10 +57,10 @@ public class MyAccountView {
         usernameLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         Label emailLabel = new Label(user != null ? user.getEmail() : "");
-        emailLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #64748B;");
+        emailLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: -text-subtle;");
 
         Label roleLabel = new Label("Role: " + (user != null ? user.getRole().toUpperCase() : "N/A"));
-        roleLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: #64748B;");
+        roleLabel.setStyle("-fx-font-size: 13px; -fx-text-fill: -text-subtle;");
 
         profileCard.getChildren().addAll(profileTitle, avatarHolder, usernameLabel, emailLabel, roleLabel);
 
@@ -73,7 +73,7 @@ public class MyAccountView {
 
         String balanceStr = account != null ? String.format("$%.2f ", account.getBalance()) : "$0.00";
         Label balanceAmount = new Label(balanceStr);
-        balanceAmount.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #10B981;");
+        balanceAmount.setStyle("-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: -success;");
 
         Label depositLabel = new Label("Deposit Funds");
         depositLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
@@ -260,12 +260,12 @@ public class MyAccountView {
 
                     if (filtered.isEmpty()) {
                         Label empty = new Label("No transactions found.");
-                        empty.setStyle("-fx-text-fill: #64748B; -fx-padding: 20;");
+                        empty.setStyle("-fx-text-fill: -text-subtle; -fx-padding: 20;");
                         txList.getChildren().add(empty);
                     } else {
                         for (Transaction tx : filtered) {
                             HBox row = new HBox(12);
-                            row.setStyle("-fx-border-color: #E2E8F0; -fx-border-width: 0 0 1 0; -fx-padding: 10 0;");
+                            row.setStyle("-fx-border-color: -border-color; -fx-border-width: 0 0 1 0; -fx-padding: 10 0;");
                             row.setAlignment(Pos.CENTER_LEFT);
 
                             String typeIcon = "PURCHASE".equals(tx.getType()) ? "\uD83D\uDED2" : "\uD83D\uDCB0";
@@ -277,16 +277,16 @@ public class MyAccountView {
                             Label txType = new Label(tx.getType());
                             txType.setStyle("-fx-font-weight: bold; -fx-font-size: 13px;");
                             Label txDate = new Label(tx.getCreatedAt() != null ? tx.getCreatedAt() : "");
-                            txDate.setStyle("-fx-text-fill: #64748B; -fx-font-size: 12px;");
+                            txDate.setStyle("-fx-text-fill: -text-subtle; -fx-font-size: 12px;");
                             txInfo.getChildren().addAll(txType, txDate);
 
                             Label amount = new Label(String.format("$%.2f", tx.getAmount()));
                             amount.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
                             if ("DEPOSIT".equals(tx.getType())) {
-                                amount.setStyle(amount.getStyle() + " -fx-text-fill: #10B981;");
+                                amount.setStyle(amount.getStyle() + " -fx-text-fill: -success;");
                                 amount.setText("+" + amount.getText());
                             } else {
-                                amount.setStyle(amount.getStyle() + " -fx-text-fill: #EF4444;");
+                                amount.setStyle(amount.getStyle() + " -fx-text-fill: -danger;");
                                 amount.setText("-" + amount.getText());
                             }
 

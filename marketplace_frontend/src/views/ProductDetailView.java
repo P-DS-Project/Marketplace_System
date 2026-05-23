@@ -81,7 +81,7 @@ public class ProductDetailView {
                 nameLabel.setWrapText(true);
 
                 Label brandLabel = new Label("Brand: " + (product.getBrand() != null && !product.getBrand().isEmpty() ? product.getBrand() : "Not specified"));
-                brandLabel.setStyle("-fx-text-fill: #64748B; -fx-font-size: 14px;");
+                brandLabel.setStyle("-fx-text-fill: -text-subtle; -fx-font-size: 14px;");
 
                 Label priceLabel = new Label(String.format("$%.2f", product.getPrice()));
                 priceLabel.getStyleClass().add("product-price");
@@ -96,22 +96,33 @@ public class ProductDetailView {
 
                 int currentUserId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
 
-                String stockText;
-                if (currentUserId == product.getSellerId()) {
-                    stockText = "Stock: " + (inventory != null ? inventory.getQuantity() + " units" : "N/A");
-                } else {
-                    stockText = "Stock: " + (inventory != null && inventory.getQuantity() > 0 ? "In Stock" : "Out of Stock");
-                }
-
-                VBox infoCard = new VBox(8);
+                VBox infoCard = new VBox(10);
                 infoCard.getStyleClass().add("card");
-                infoCard.getChildren().addAll(
-                    new Label("Product ID: " + product.getProductId()),
-                    new Label("Seller ID: " + product.getSellerId()),
-                    new Label("Category ID: " + product.getCategoryId()),
-                    new Label(stockText),
-                    new Label("Warehouse: " + (inventory != null ? inventory.getWarehouseNode() : "N/A"))
-                );
+
+                // User-friendly stock display
+                boolean isOwner = (currentUserId == product.getSellerId());
+                boolean hasStock = inventory != null && inventory.getQuantity() > 0;
+
+                HBox stockRow = new HBox(10);
+                stockRow.setAlignment(Pos.CENTER_LEFT);
+                Label stockIcon = new Label(hasStock ? "\u2705" : "\u274C");
+                stockIcon.setStyle("-fx-font-size: 16px;");
+                String stockText = isOwner
+                    ? "Stock: " + (inventory != null ? inventory.getQuantity() + " units" : "N/A")
+                    : (hasStock ? "In Stock \u2014 Available Now" : "Out of Stock");
+                Label stockInfo = new Label(stockText);
+                stockInfo.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
+                stockRow.getChildren().addAll(stockIcon, stockInfo);
+
+                HBox sellerRow = new HBox(10);
+                sellerRow.setAlignment(Pos.CENTER_LEFT);
+                Label sellerIcon = new Label("\uD83C\uDFEA");
+                sellerIcon.setStyle("-fx-font-size: 16px;");
+                Label sellerInfo = new Label(isOwner ? "This is your product" : "Sold by a verified seller");
+                sellerInfo.setStyle("-fx-font-size: 14px;");
+                sellerRow.getChildren().addAll(sellerIcon, sellerInfo);
+
+                infoCard.getChildren().addAll(stockRow, new Separator(), sellerRow);
 
                 // Action buttons
                 HBox actions = new HBox(12);
