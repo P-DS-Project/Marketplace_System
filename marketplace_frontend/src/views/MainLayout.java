@@ -95,22 +95,21 @@ public class MainLayout {
 
         // Admin badge
         User user = SessionManager.getInstance().getCurrentUser();
-        Label adminBadge = new Label("\uD83D\uDEE1\uFE0F Admin");
+        Label adminBadge = new Label("Admin");
         adminBadge.setStyle("-fx-background-color: #EDE9FE; -fx-text-fill: #6D28D9; -fx-padding: 4 12; " +
                 "-fx-background-radius: 20; -fx-font-size: 11px; -fx-font-weight: bold;");
         adminBadge.setVisible(user != null && user.isAdmin());
         adminBadge.setManaged(user != null && user.isAdmin());
 
-
         // Dark mode toggle button
         boolean isDark = ThemeManager.isDarkMode();
-        Button darkModeBtn = new Button(isDark ? "☀️" : "🌙");
+        Button darkModeBtn = new Button(isDark ? "\u2600" : "\uD83C\uDF19");
         darkModeBtn.getStyleClass().addAll("button", "dark-mode-btn");
         darkModeBtn.setTooltip(new Tooltip(isDark ? "Switch to Light Mode" : "Switch to Dark Mode"));
         darkModeBtn.setOnAction(e -> {
             ThemeManager.toggleTheme(root.getScene());
             boolean nowDark = ThemeManager.isDarkMode();
-            darkModeBtn.setText(nowDark ? "☀️" : "🌙");
+            darkModeBtn.setText(nowDark ? "\u2600" : "\uD83C\uDF19");
             darkModeBtn.getTooltip().setText(nowDark ? "Switch to Light Mode" : "Switch to Dark Mode");
         });
 
@@ -133,14 +132,13 @@ public class MainLayout {
         MenuButton userMenu = new MenuButton(initials + "  " + userName);
         userMenu.getStyleClass().addAll("button", "user-menu-btn");
 
-
-        CheckMenuItem themeItem = new CheckMenuItem("🌙 Dark Mode");
+        CheckMenuItem themeItem = new CheckMenuItem("\uD83C\uDF19 Dark Mode");
         themeItem.setSelected(ThemeManager.isDarkMode());
         themeItem.setOnAction(e -> {
             ThemeManager.toggleTheme(root.getScene());
             boolean nowDark = ThemeManager.isDarkMode();
             themeItem.setSelected(nowDark);
-            darkModeBtn.setText(nowDark ? "☀️" : "🌙");
+            darkModeBtn.setText(nowDark ? "\u2600" : "\uD83C\uDF19");
             darkModeBtn.getTooltip().setText(nowDark ? "Switch to Light Mode" : "Switch to Dark Mode");
         });
 
@@ -155,7 +153,8 @@ public class MainLayout {
 
         userMenu.getItems().addAll(themeItem, profileItem, new SeparatorMenuItem(), logoutItem);
 
-        topBar.getChildren().addAll(menuBtn, brand, spacerL, searchBox, spacerR, adminBadge, darkModeBtn, cartContainer, userMenu);
+        topBar.getChildren().addAll(menuBtn, brand, spacerL, searchBox, spacerR, adminBadge, darkModeBtn, cartContainer,
+                userMenu);
         return topBar;
     }
 
@@ -190,7 +189,8 @@ public class MainLayout {
         ScrollPane scrollPane = new ScrollPane(sbContent);
         scrollPane.setFitToWidth(true);
         scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scrollPane.setStyle("-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
+        scrollPane.setStyle(
+                "-fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;");
 
         // Close button at top
         HBox closeRow = new HBox();
@@ -212,7 +212,7 @@ public class MainLayout {
 
         Button homeBtn = createNavButton("\uD83C\uDFE0  Home", "home");
         Button browseBtn = createNavButton("\uD83D\uDCE6  Browse", "browse");
-        Button myProductsBtn = createNavButton("\uD83C\uDFF7\uFE0F  My Products", "myproducts");
+        Button myProductsBtn = createNavButton("\uD83C\uDFF7  My Products", "myproducts");
         Button cartNavBtn = createNavButton("\uD83D\uDED2  Cart", "cart");
 
         Label manageSection = new Label("MANAGE");
@@ -223,16 +223,15 @@ public class MainLayout {
         Button myAccountBtn = createNavButton("\uD83D\uDC64  My Account", "myaccount");
 
         sbContent.getChildren().addAll(
-            closeRow, sidebarBrand,
-            navSection, homeBtn, browseBtn, myProductsBtn, cartNavBtn,
-            new Separator(),
-            manageSection, chatBtn, myShopBtn, myAccountBtn
-        );
+                closeRow, sidebarBrand,
+                navSection, homeBtn, browseBtn, myProductsBtn, cartNavBtn,
+                new Separator(),
+                manageSection, chatBtn, myShopBtn, myAccountBtn);
 
         // Admin section — only visible if the current user is an admin
         User user = SessionManager.getInstance().getCurrentUser();
         if (user != null && user.isAdmin()) {
-            Label adminSection = new Label("\u2699\uFE0F  ADMIN");
+            Label adminSection = new Label("ADMIN");
             adminSection.getStyleClass().add("sidebar-section");
 
             Button adminDashBtn = createNavButton("\uD83D\uDCCA  Dashboard", "admin-dashboard");
@@ -241,9 +240,8 @@ public class MainLayout {
             Button adminTxBtn = createNavButton("\uD83D\uDCB3  Transactions", "admin-transactions");
 
             sbContent.getChildren().addAll(
-                new Separator(), adminSection,
-                adminDashBtn, adminUsersBtn, adminProductsBtn, adminTxBtn
-            );
+                    new Separator(), adminSection,
+                    adminDashBtn, adminUsersBtn, adminProductsBtn, adminTxBtn);
         }
 
         // Sidebar wrapper
@@ -264,7 +262,8 @@ public class MainLayout {
             navigateTo(viewId);
             setActiveNav(btn);
             // Auto-close sidebar on navigation (like the example)
-            if (sidebarVisible) toggleSidebar();
+            if (sidebarVisible)
+                toggleSidebar();
         });
         if (viewId.equals("home")) {
             setActiveNav(btn);
@@ -283,19 +282,45 @@ public class MainLayout {
     public void navigateTo(String viewId) {
         Node view;
         switch (viewId) {
-            case "home": view = new HomeView(this).getRoot(); break;
-            case "browse": view = new BrowseView(this).getRoot(); break;
-            case "myproducts": view = new SellerDashboardView(this).getRoot(); break;
-            case "chat": view = new ChatView(-1).getRoot(); break;
-            case "cart": view = new CartView(this).getRoot(); break;
-            case "myshop": view = new MyShopView(this).getRoot(); break;
-            case "myaccount": view = new MyAccountView(this).getRoot(); break;
-            case "addproduct": view = new AddProductView(this).getRoot(); break;
-            case "admin-dashboard": view = new AdminDashboardView(this).getRoot(); break;
-            case "admin-users": view = new AdminUsersView(this).getRoot(); break;
-            case "admin-products": view = new AdminProductsView(this).getRoot(); break;
-            case "admin-transactions": view = new AdminTransactionsView(this).getRoot(); break;
-            default: view = new HomeView(this).getRoot(); break;
+            case "home":
+                view = new HomeView(this).getRoot();
+                break;
+            case "browse":
+                view = new BrowseView(this).getRoot();
+                break;
+            case "myproducts":
+                view = new SellerDashboardView(this).getRoot();
+                break;
+            case "chat":
+                view = new ChatView(-1).getRoot();
+                break;
+            case "cart":
+                view = new CartView(this).getRoot();
+                break;
+            case "myshop":
+                view = new MyShopView(this).getRoot();
+                break;
+            case "myaccount":
+                view = new MyAccountView(this).getRoot();
+                break;
+            case "addproduct":
+                view = new AddProductView(this).getRoot();
+                break;
+            case "admin-dashboard":
+                view = new AdminDashboardView(this).getRoot();
+                break;
+            case "admin-users":
+                view = new AdminUsersView(this).getRoot();
+                break;
+            case "admin-products":
+                view = new AdminProductsView(this).getRoot();
+                break;
+            case "admin-transactions":
+                view = new AdminTransactionsView(this).getRoot();
+                break;
+            default:
+                view = new HomeView(this).getRoot();
+                break;
         }
         setContent(view);
     }

@@ -3,6 +3,7 @@ package Microservices;
 import DAOs.TransactionDAO;
 import DAOs.ProductDAO;
 import DAOs.InventoryDAO;
+import DAOs.ReportDAO;
 
 import Entities.TransactionEntity;
 import Entities.ProductEntity;
@@ -17,12 +18,13 @@ public class ReportService {
     private final TransactionDAO transactionDao;
     private final ProductDAO productDao;
     private final InventoryDAO inventoryDao;
+    private final ReportDAO reportDao;
 
     public ReportService() {
         this.transactionDao = new TransactionDAO();
         this.productDao = new ProductDAO();
         this.inventoryDao = new InventoryDAO();
-
+        this.reportDao = new ReportDAO();
     }
 
     public String getTransactionHistory(int userId) {
@@ -65,6 +67,13 @@ public class ReportService {
             report.put("totalEarned", totalEarned);
             report.put("purchaseCount", purchaseCount);
             report.put("saleCount", saleCount);
+
+            // Persist report to database
+            String params = new JSONObject().put("userId", userId).toString();
+            String summary = String.format("Transaction history: %d transactions, spent $%.2f, earned $%.2f, %d purchases, %d sales.",
+                transactions.size(), totalSpent, totalEarned, purchaseCount, saleCount);
+            int reportId = reportDao.insertReport(userId, "TRANSACTION_HISTORY", params, summary);
+            report.put("reportId", reportId);
 
             return "SUCCESS " + report.toString();
         } catch (Exception e) {
@@ -119,13 +128,20 @@ public class ReportService {
             report.put("soldProducts", soldProducts);
             report.put("averageOrderValue", totalSales > 0 ? totalRevenue / totalSales : 0);
 
+            // Persist report to database
+            String params = new JSONObject().put("sellerId", sellerId).toString();
+            String summary = String.format("Sales report: $%.2f revenue, %d sales, %d items sold, %d active products, avg order $%.2f.",
+                totalRevenue, totalSales, totalItemsSold, activeProducts, totalSales > 0 ? totalRevenue / totalSales : 0);
+            int reportId = reportDao.insertReport(sellerId, "SALES_REPORT", params, summary);
+            report.put("reportId", reportId);
+
             return "SUCCESS " + report.toString();
         } catch (Exception e) {
             return "ERROR: Failed to generate sales report - " + e.getMessage();
         }
     }
 
-    public String getInventoryReport() {
+    public String getInventoryReport(int requestedBy) {
         try {
             JSONArray inventoryArray = new JSONArray();
             // Query all available products and their inventory
@@ -165,13 +181,20 @@ public class ReportService {
             report.put("inStockCount", inStockCount);
             report.put("outOfStockCount", outOfStockCount);
 
+            // Persist report to database (generated_by = 0 means system/anonymous)
+            String params = new JSONObject().put("scope", "all").toString();
+            String summary = String.format("Inventory report: %d total products, %d in stock, %d out of stock.",
+                totalProducts, inStockCount, outOfStockCount);
+            int reportId = reportDao.insertReport(requestedBy, "INVENTORY_REPORT", params, summary);
+            report.put("reportId", reportId);
+
             return "SUCCESS " + report.toString();
         } catch (Exception e) {
             return "ERROR: Failed to generate inventory report - " + e.getMessage();
         }
     }
 
-    public String getSystemStatistics() {
+    public String getSystemStatistics(int requestedBy) {
         try {
             // Get all products
             List<ProductEntity> products = productDao.advancedSearch(
@@ -191,6 +214,13 @@ public class ReportService {
             report.put("totalProducts", totalProducts);
             report.put("availableProducts", availableProducts);
             report.put("soldProducts", soldProducts);
+
+            // Persist report to database (generated_by = 0 means system/anonymous)
+            String params = new JSONObject().put("scope", "system").toString();
+            String summary = String.format("System statistics: %d total products, %d available, %d sold out.",
+                totalProducts, availableProducts, soldProducts);
+            int reportId = reportDao.insertReport(requestedBy, "SYSTEM_STATISTICS", params, summary);
+            report.put("reportId", reportId);
 
             return "SUCCESS " + report.toString();
         } catch (Exception e) {

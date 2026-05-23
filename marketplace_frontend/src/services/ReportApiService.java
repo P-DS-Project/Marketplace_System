@@ -31,8 +31,10 @@ public class ReportApiService {
         return null;
     }
 
-    public JSONObject getInventoryReport() {
-        String response = client.sendRequest("REPORT", "GET_INVENTORY_REPORT", new JSONObject());
+    public JSONObject getInventoryReport(int userId) {
+        JSONObject payload = new JSONObject();
+        payload.put("userId", userId);
+        String response = client.sendRequest("REPORT", "GET_INVENTORY_REPORT", payload);
         int code = SocketClient.getStatusCode(response);
         if (code == 200) {
             return SocketClient.getResponseBody(response);
@@ -40,8 +42,10 @@ public class ReportApiService {
         return null;
     }
 
-    public JSONObject getSystemStatistics() {
-        String response = client.sendRequest("REPORT", "GET_SYSTEM_STATISTICS", new JSONObject());
+    public JSONObject getSystemStatistics(int userId) {
+        JSONObject payload = new JSONObject();
+        payload.put("userId", userId);
+        String response = client.sendRequest("REPORT", "GET_SYSTEM_STATISTICS", payload);
         int code = SocketClient.getStatusCode(response);
         if (code == 200) {
             return SocketClient.getResponseBody(response);

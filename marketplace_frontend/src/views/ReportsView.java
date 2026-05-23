@@ -140,11 +140,12 @@ public class ReportsView {
     }
 
     private void loadInventoryReport() {
+        int userId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
         reportContent.getChildren().clear();
         reportContent.getChildren().add(new Label("Loading..."));
 
         new Thread(() -> {
-            JSONObject report = reportApi.getInventoryReport();
+            JSONObject report = reportApi.getInventoryReport(userId);
             javafx.application.Platform.runLater(() -> {
                 reportContent.getChildren().clear();
                 if (report == null) { reportContent.getChildren().add(new Label("Failed to load report.")); return; }
@@ -183,11 +184,12 @@ public class ReportsView {
     }
 
     private void loadSystemStats() {
+        int userId = SessionManager.getInstance().getCurrentUser() != null ? SessionManager.getInstance().getCurrentUser().getUserId() : -1;
         reportContent.getChildren().clear();
         reportContent.getChildren().add(new Label("Loading..."));
 
         new Thread(() -> {
-            JSONObject report = reportApi.getSystemStatistics();
+            JSONObject report = reportApi.getSystemStatistics(userId);
             javafx.application.Platform.runLater(() -> {
                 reportContent.getChildren().clear();
                 if (report == null) { reportContent.getChildren().add(new Label("Failed to load report.")); return; }

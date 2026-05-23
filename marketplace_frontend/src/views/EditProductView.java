@@ -22,7 +22,7 @@ public class EditProductView {
         backBtn.getStyleClass().addAll("button", "button-secondary");
         backBtn.setOnAction(e -> layout.navigateTo("myproducts"));
 
-        Label title = new Label("\u270F\uFE0F Edit Product");
+        Label title = new Label("\u270F Edit Product");
         title.getStyleClass().add("heading");
 
         Label loading = new Label("Loading product...");

@@ -157,7 +157,7 @@ public class MyAccountView {
         Label actionsTitle = new Label("Account Actions");
         actionsTitle.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
 
-        Button editProfileBtn = new Button("\u270F\uFE0F Edit Profile");
+        Button editProfileBtn = new Button("\u270F Edit Profile");
         editProfileBtn.setMaxWidth(Double.MAX_VALUE);
         editProfileBtn.getStyleClass().addAll("button", "button-outline");
         editProfileBtn.setOnAction(e -> showEditProfileDialog());
@@ -175,7 +175,7 @@ public class MyAccountView {
             NavigationController.showLogin();
         });
 
-        Button deleteBtn = new Button("\u26A0\uFE0F Delete Account");
+        Button deleteBtn = new Button("\u26A0 Delete Account");
         deleteBtn.setMaxWidth(Double.MAX_VALUE);
         deleteBtn.getStyleClass().addAll("button", "button-danger");
         deleteBtn.setOnAction(e -> {
@@ -280,9 +280,23 @@ public class MyAccountView {
                             txDate.setStyle("-fx-text-fill: -text-subtle; -fx-font-size: 12px;");
                             txInfo.getChildren().addAll(txType, txDate);
 
+                            int currentUserId = SessionManager.getInstance().getCurrentUser().getUserId();
                             Label amount = new Label(String.format("$%.2f", tx.getAmount()));
                             amount.setStyle("-fx-font-weight: bold; -fx-font-size: 14px;");
-                            if ("DEPOSIT".equals(tx.getType())) {
+
+                            boolean isIncoming;
+                            if ("PURCHASE".equals(tx.getType())) {
+                                // I'm the seller → money coming in (green +)
+                                // I'm the buyer → money going out (red -)
+                                isIncoming = (tx.getSellerId() == currentUserId);
+                            } else if ("DEPOSIT".equals(tx.getType())) {
+                                isIncoming = true;
+                            } else {
+                                // WITHDRAWAL
+                                isIncoming = false;
+                            }
+
+                            if (isIncoming) {
                                 amount.setStyle(amount.getStyle() + " -fx-text-fill: -success;");
                                 amount.setText("+" + amount.getText());
                             } else {

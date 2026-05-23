@@ -47,7 +47,7 @@ public class SearchView {
         VBox filterPanel = new VBox(12);
         filterPanel.getStyleClass().add("card");
 
-        Label filterTitle = new Label("\u2699\uFE0F Refine Results");
+        Label filterTitle = new Label("\u2699 Refine Results");
         filterTitle.setStyle("-fx-font-weight: bold; -fx-font-size: 15px;");
 
         HBox filterRow = new HBox(16);
@@ -189,12 +189,12 @@ public class SearchView {
                 imgView.setPreserveRatio(true);
                 imgPlaceholder.getChildren().add(imgView);
             } catch (Exception e) {
-                Label icon = new Label("\uD83D\uDDBC\uFE0F");
+                Label icon = new Label("\uD83D\uDDBC");
                 icon.setStyle("-fx-font-size: 44px;");
                 imgPlaceholder.getChildren().add(icon);
             }
         } else {
-            Label icon = new Label("\uD83D\uDDBC\uFE0F");
+            Label icon = new Label("\uD83D\uDDBC");
             icon.setStyle("-fx-font-size: 44px;");
             imgPlaceholder.getChildren().add(icon);
         }

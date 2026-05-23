@@ -258,7 +258,7 @@ public class AdminUsersView {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION,
             "Are you sure you want to permanently delete user \"" + username + "\" (ID: " + userId + ")?\n\nThis action cannot be undone.",
             ButtonType.YES, ButtonType.NO);
-        alert.setHeaderText("\u26A0\uFE0F Delete User");
+        alert.setHeaderText("\u26A0 Delete User");
         alert.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.YES) {
                 boolean ok = adminApi.deleteUser(SessionManager.getInstance().getToken(), userId);

@@ -6,6 +6,7 @@ import javafx.scene.layout.*;
 import javafx.scene.image.*;
 import services.ReportApiService;
 import services.ProductApiService;
+import services.UserApiService;
 import models.Product;
 import state.SessionManager;
 import org.json.JSONObject;
@@ -18,6 +19,7 @@ public class MyShopView {
     private final MainLayout layout;
     private final ReportApiService reportApi = new ReportApiService();
     private final ProductApiService productApi = new ProductApiService();
+    private final UserApiService userApi = new UserApiService();
     private final VBox contentBox;
 
     public MyShopView(MainLayout layout) {
@@ -190,7 +192,7 @@ public class MyShopView {
         // Out-of-stock product alerts
         if (!outOfStockProducts.isEmpty()) {
             Separator sep = new Separator();
-            Label alertTitle = new Label("\u26A0\uFE0F  Needs Restocking");
+            Label alertTitle = new Label("\u26A0  Needs Restocking");
             alertTitle.setStyle("-fx-font-weight: bold; -fx-text-fill: -warning; -fx-font-size: 14px;");
 
             VBox alertsBox = new VBox(8);
@@ -280,9 +282,11 @@ public class MyShopView {
                         row.setStyle("-fx-border-color: transparent transparent -border-color transparent; -fx-border-width: 0 0 1 0;");
                     }
 
-                    Label txId = new Label("TX #" + sale.optInt("transactionId"));
+                    Label txId = new Label("Sale #" + (i + 1));
                     txId.setPrefWidth(100);
-                    Label buyer = new Label("Buyer #" + sale.optInt("buyerId"));
+                    int buyerId = sale.optInt("buyerId", 0);
+                    String buyerName = userApi.getUsername(buyerId);
+                    Label buyer = new Label(buyerName);
                     buyer.setPrefWidth(100);
                     Label qty = new Label(String.valueOf(sale.optInt("quantity")));
                     qty.setPrefWidth(60);
@@ -332,7 +336,7 @@ public class MyShopView {
             int displayCount = Math.min(salesArr.length(), 10);
             for (int i = displayCount - 1; i >= 0; i--) {
                 JSONObject sale = salesArr.getJSONObject(i);
-                series.getData().add(new javafx.scene.chart.XYChart.Data<>("TX #" + sale.optInt("transactionId"), sale.optDouble("amount", 0)));
+                series.getData().add(new javafx.scene.chart.XYChart.Data<>("Sale #" + (i + 1), sale.optDouble("amount", 0)));
             }
         }
         lineChart.getData().add(series);

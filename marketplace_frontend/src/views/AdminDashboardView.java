@@ -6,6 +6,7 @@ import javafx.scene.layout.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import services.AdminApiService;
+import services.ReportApiService;
 import state.SessionManager;
 
 public class AdminDashboardView {
@@ -54,7 +55,7 @@ public class AdminDashboardView {
 
         row.getChildren().addAll(
             createStatCard("\uD83D\uDC65", "Total Users", String.valueOf(totalUsers), "-primary"),
-            createStatCard("\uD83D\uDEE1\uFE0F", "Admins", String.valueOf(totalAdmins), "-secondary"),
+            createStatCard("\uD83D\uDEE1", "Admins", String.valueOf(totalAdmins), "-secondary"),
             createStatCard("\uD83D\uDCE6", "Products", String.valueOf(totalProducts), "-accent"),
             createStatCard("\uD83D\uDCB3", "Transactions", String.valueOf(totalTx), "-success"),
             createStatCard("\uD83D\uDCB0", "Revenue", String.format("EGP %.0f", totalRevenue), "-warning")
@@ -106,7 +107,18 @@ public class AdminDashboardView {
         Button genReport = new Button("\uD83D\uDCC4  Generate Report");
         genReport.getStyleClass().addAll("button", "button-outline");
         genReport.setOnAction(e -> {
-            utils.AlertHelper.showSuccess("A comprehensive system report has been generated securely.");
+            int userId = SessionManager.getInstance().getCurrentUser().getUserId();
+            new Thread(() -> {
+                ReportApiService reportApi = new ReportApiService();
+                JSONObject report = reportApi.getSystemStatistics(userId);
+                javafx.application.Platform.runLater(() -> {
+                    if (report != null) {
+                        utils.AlertHelper.showSuccess("A comprehensive system report has been generated securely.");
+                    } else {
+                        utils.AlertHelper.showError("Failed", "Failed to generate report.");
+                    }
+                });
+            }).start();
         });
 
         row.getChildren().addAll(manageUsers, manageProducts, viewTransactions, genReport);

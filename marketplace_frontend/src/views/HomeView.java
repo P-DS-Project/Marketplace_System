@@ -82,7 +82,7 @@ public class HomeView {
         HBox insightsRow = new HBox(16);
         insightsRow.setAlignment(Pos.CENTER_LEFT);
         insightsRow.getChildren().addAll(
-            createStatCard("\uD83D\uDEE1\uFE0F", "Payments & Data", "100% Secure"),
+            createStatCard("\uD83D\uDEE1", "Payments & Data", "100% Secure"),
             createStatCard("\u2B50", "Verified Sellers", "Top Rated"),
             createStatCard("\uD83D\uDE9A", "Nationwide", "Fast Delivery"),
             createStatCard("\uD83C\uDF1F", "Premium Products", "Quality Assured")

@@ -25,6 +25,7 @@ public class SearchService {
             productJson.put("categoryId", p.getCategoryId());
             productJson.put("status", p.getStatus());
             productJson.put("description", p.getDescription());
+            productJson.put("imageUrl", p.getImageUrl() != null ? p.getImageUrl() : "");
             if (p.getCreatedAt() != null) {
                 productJson.put("createdAt", p.getCreatedAt().toString());
             }

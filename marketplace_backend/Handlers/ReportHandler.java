@@ -40,12 +40,14 @@ public class ReportHandler implements ServiceHandler {
             }
 
             case "GET_INVENTORY_REPORT": {
-                String result = reportService.getInventoryReport();
+                int requestedBy = json.optInt("userId", json.optInt("sellerId", 0));
+                String result = reportService.getInventoryReport(requestedBy);
                 return formatResponse(result);
             }
 
             case "GET_SYSTEM_STATISTICS": {
-                String result = reportService.getSystemStatistics();
+                int requestedBy = json.optInt("userId", 0);
+                String result = reportService.getSystemStatistics(requestedBy);
                 return formatResponse(result);
             }
 

@@ -131,6 +131,8 @@ public class UserService {
         for (TransactionEntity t : transactions) {
             JSONObject tObj = new JSONObject();
             tObj.put("transactionId", t.getTransactionId());
+            tObj.put("buyerId", t.getBuyerId());
+            tObj.put("sellerId", t.getSellerId());
             tObj.put("amount", t.getAmount());
             tObj.put("type", t.getType());
             tObj.put("status", t.getStatus());

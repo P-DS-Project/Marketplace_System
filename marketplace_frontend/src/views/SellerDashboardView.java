@@ -186,7 +186,7 @@ public class SellerDashboardView {
         HBox actions = new HBox(6);
         actions.setAlignment(Pos.CENTER_LEFT);
 
-        Button editBtn = new Button("\u270F\uFE0F Edit");
+        Button editBtn = new Button("\u270F Edit");
         editBtn.getStyleClass().addAll("button", "button-outline");
         editBtn.setStyle("-fx-padding: 4 12; -fx-font-size: 12px;");
         editBtn.setOnAction(e -> layout.navigateToEditProduct(p.getProductId()));
@@ -201,7 +201,7 @@ public class SellerDashboardView {
             else AlertHelper.showError("Error", result);
         });
 
-        Button deleteBtn = new Button("\uD83D\uDDD1\uFE0F");
+        Button deleteBtn = new Button("\uD83D\uDDD1");
         deleteBtn.getStyleClass().addAll("button", "button-danger");
         deleteBtn.setStyle("-fx-padding: 4 12; -fx-font-size: 12px;");
         deleteBtn.setOnAction(e -> {

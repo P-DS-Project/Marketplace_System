@@ -212,6 +212,8 @@ public class UserApiService {
             JSONObject t = arr.getJSONObject(i);
             Transaction tx = new Transaction();
             tx.setTransactionId(t.optInt("transactionId"));
+            tx.setBuyerId(t.optInt("buyerId", 0));
+            tx.setSellerId(t.optInt("sellerId", 0));
             tx.setAmount(t.optDouble("amount", 0));
             tx.setType(t.optString("type", ""));
             tx.setStatus(t.optString("status", ""));
